@@ -87,7 +87,7 @@ int power(int x, int y) {
 %nonassoc LNAW PNAW
 
 %type exp
-%type minus_num_pow
+
 
 
 %precedence NEG
@@ -110,17 +110,6 @@ minus_num:
 | SUB NUM %prec NEG {$$ = to_Z(to_Z(0) - to_Z($2));sprintf(polish_notation+ strlen(polish_notation), "%d ", $$);} 
 ;
 
-minus_num_pow:
-  NUM {$$ = $1;sprintf(polish_notation+ strlen(polish_notation), "%d ", $$);}
-| SUB NUM %prec NEG {$$ = to_Z(to_Z(-1) - to_Z($2));sprintf(polish_notation+ strlen(polish_notation), "%d ", $$);} 
-| minus_num_pow ADD minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "+ ");$$ = to_Z(to_Z($1) + to_Z($3)); }
-| minus_num_pow SUB minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "- ");$$ = to_Z(to_Z($1) - to_Z($3)); }
-| minus_num_pow MUL minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "* ");$$ = multiply($1,$3); }
-| minus_num_pow DIV minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "/ ");$$ = divide($1, $3); if($$ == -1) YYERROR; }
-| minus_num_pow MOD minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "%% ");$$ = modulo($1, $3); if($$ == -1) YYERROR;}
-| LNAW minus_num_pow PNAW { $$ = $2; } 
-;
-
 exp: 
  exp ADD exp  { sprintf(polish_notation + strlen(polish_notation), "+ ");$$ = to_Z(to_Z($1) + to_Z($3)); }
 | exp SUB exp  { sprintf(polish_notation + strlen(polish_notation), "- ");$$ = to_Z(to_Z($1) - to_Z($3)); }
@@ -132,6 +121,16 @@ exp:
 |minus_num
 ;
 
+minus_num_pow:
+  NUM {$$ = $1;sprintf(polish_notation+ strlen(polish_notation), "%d ", $$);}
+| SUB NUM %prec NEG {$$ = to_Z(to_Z(-1) - to_Z($2));sprintf(polish_notation+ strlen(polish_notation), "%d ", $$);} 
+| minus_num_pow ADD minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "+ ");$$ = to_Z(to_Z($1) + to_Z($3)); }
+| minus_num_pow SUB minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "- ");$$ = to_Z(to_Z($1) - to_Z($3)); }
+| minus_num_pow MUL minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "* ");$$ = multiply($1,$3); }
+| minus_num_pow DIV minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "/ ");$$ = divide($1, $3); if($$ == -1) YYERROR; }
+| minus_num_pow MOD minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "%% ");$$ = modulo($1, $3); if($$ == -1) YYERROR;}
+| LNAW minus_num_pow PNAW { $$ = $2; } 
+;
 %%
 
 int yyerror(char *s)
