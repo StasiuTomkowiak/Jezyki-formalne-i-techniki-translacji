@@ -2,10 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
-#include <stdbool.h>
 #include <math.h>
-
 #include "calculator_y.h"
 #define Z 1234577
 
@@ -40,6 +37,7 @@ int inverse(int a) {
 
     return x;
 }
+
 int multiply(int x, int y){
     int output = to_Z(x);
     for (int i = 1; i < y; i++) {
@@ -48,6 +46,7 @@ int multiply(int x, int y){
     }
     return output;
 }
+
 int divide(int x, int y) {
     if(y == 0) {
         yyerror("dzielenie przez zero");
@@ -66,6 +65,7 @@ int modulo(int x, int y) {
         return to_Z(to_Z(x) % to_Z(y));
     }
 }
+
 int power(int x, int y) {
     int output = 1;
     for (int i = 0; i < y; i++) {
@@ -75,8 +75,6 @@ int power(int x, int y) {
     return output;
 }
 %}
-
-
 
 %token NUM
 %token END ERROR COMM 
