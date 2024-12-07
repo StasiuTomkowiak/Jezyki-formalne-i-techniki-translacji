@@ -35,8 +35,8 @@
    especially those whose name start with YY_ or yy_.  They are
    private implementation details that can be changed or removed.  */
 
-#ifndef YY_YY_CALCULATOR_Y_H_INCLUDED
-# define YY_YY_CALCULATOR_Y_H_INCLUDED
+#ifndef YY_YY_BOOL_CALC_Y_H_INCLUDED
+# define YY_YY_BOOL_CALC_Y_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -54,18 +54,14 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    NUM = 258,                     /* NUM  */
-    END = 259,                     /* END  */
-    ERROR = 260,                   /* ERROR  */
-    COMM = 261,                    /* COMM  */
-    ADD = 262,                     /* ADD  */
-    SUB = 263,                     /* SUB  */
-    MUL = 264,                     /* MUL  */
-    DIV = 265,                     /* DIV  */
-    MOD = 266,                     /* MOD  */
-    POW = 267,                     /* POW  */
-    LNAW = 268,                    /* LNAW  */
-    PNAW = 269                     /* PNAW  */
+    VAL = 258,                     /* VAL  */
+    AND = 259,                     /* AND  */
+    OR = 260,                      /* OR  */
+    NOT = 261,                     /* NOT  */
+    LNAW = 262,                    /* LNAW  */
+    PNAW = 263,                    /* PNAW  */
+    END = 264,                     /* END  */
+    ERROR = 265                    /* ERROR  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -84,4 +80,4 @@ extern YYSTYPE yylval;
 int yyparse (void);
 
 
-#endif /* !YY_YY_CALCULATOR_Y_H_INCLUDED  */
+#endif /* !YY_YY_BOOL_CALC_Y_H_INCLUDED  */

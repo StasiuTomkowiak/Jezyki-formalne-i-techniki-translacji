@@ -16,6 +16,7 @@ int yylex();
 %}
 %%
 \#.*	{ return COMM; }
+[ \t]+      {}
 
 \+  { return ADD; }
 \-  { return SUB; }
@@ -30,7 +31,7 @@ int yylex();
 
 [[:digit:]]+    { int d; sscanf(yytext, "%d", &d); yylval = d % Z; return NUM; }
 
-[[:blank]]      {}
+
 \n	{ return END; }
 .	{ return ERROR; }
 %%
