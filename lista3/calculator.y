@@ -7,11 +7,12 @@
 #include <math.h>
 
 #include "calculator_y.h"
+#define Z 1234577
 
 int yylex (void);
 int yyerror (char  *s);
 
-#define Z 1234577
+char polish_notation[100];
 
 int to_Z(int x) {
     return ((x % Z) + Z) % Z;
@@ -49,7 +50,7 @@ int multiply(int x, int y){
 }
 int divide(int x, int y) {
     if(y == 0) {
-        yyerror("division by zero");
+        yyerror("dzielenie przez zero");
         return -1;
     } else {
         int inv = inverse(y);
@@ -59,7 +60,7 @@ int divide(int x, int y) {
 
 int modulo(int x, int y) {
     if(y == 0) {
-        yyerror("mod by zero");
+        yyerror("dzielenie przez 0");
         return -1;
     } else {
         return to_Z(to_Z(x) % to_Z(y));
@@ -97,27 +98,28 @@ input:
 
 line:
   END
-| exp END  { printf("%d\n", $1); }
-| error END { }
+| exp END  { printf("%s\n", polish_notation);printf("Wynik: %d\n", $1);polish_notation[0]='\0'; }
+| error END {polish_notation[0]='\0'; }
 | COMM
 ;
 
 minus_num:
-  NUM {$$ = $1;}
-| SUB NUM %prec NEG {$$ = to_Z(to_Z(0) - to_Z($2));} 
+  NUM {$$ = $1; sprintf(polish_notation+ strlen(polish_notation), "%d ", $$);}
+| SUB NUM %prec NEG {$$ = to_Z(to_Z(0) - to_Z($2));sprintf(polish_notation+ strlen(polish_notation), "%d ", $$);} 
 ;
+
 minus_num_pow:
-  NUM {$$ = $1;}
-| SUB NUM %prec NEG {$$ = to_Z(to_Z(-1) - to_Z($2));} 
+  NUM {$$ = $1;sprintf(polish_notation+ strlen(polish_notation), "%d ", $$);}
+| SUB NUM %prec NEG {$$ = to_Z(to_Z(-1) - to_Z($2));sprintf(polish_notation+ strlen(polish_notation), "%d ", $$);} 
 ;
 
 exp: 
- exp ADD exp  { $$ = to_Z(to_Z($1) + to_Z($3)); }
-| exp SUB exp  { $$ = to_Z(to_Z($1) - to_Z($3)); }
-| exp MUL exp  { $$ = to_Z(to_Z($1) * to_Z($3)); }
-| exp DIV exp  { $$ = divide($1, $3); if($$ == -1) YYERROR; }
-| exp MOD exp  { $$ = modulo($1, $3); if($$ == -1) YYERROR;} 
-| minus_num POW minus_num_pow  { $$ = power($1, $3) ; }
+ exp ADD exp  { sprintf(polish_notation + strlen(polish_notation), "+ ");$$ = to_Z(to_Z($1) + to_Z($3)); }
+| exp SUB exp  { sprintf(polish_notation + strlen(polish_notation), "- ");$$ = to_Z(to_Z($1) - to_Z($3)); }
+| exp MUL exp  { sprintf(polish_notation + strlen(polish_notation), "* ");$$ = to_Z(to_Z($1) * to_Z($3)); }
+| exp DIV exp  { sprintf(polish_notation + strlen(polish_notation), "/ ");$$ = divide($1, $3); if($$ == -1) YYERROR; }
+| exp MOD exp  { sprintf(polish_notation + strlen(polish_notation), "%% ");$$ = modulo($1, $3); if($$ == -1) YYERROR;} 
+| minus_num POW minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "^ ");$$ = power($1, $3) ; }
 | LNAW exp PNAW { $$ = $2; }
 |minus_num
 ;
