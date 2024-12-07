@@ -1,45 +1,73 @@
 %{
-#define YYSTYPE int
-#include<stdio.h>
-extern int yylineno;  // z lex-a
-int yylex();
-int yyerror(char*);
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <math.h>
+
+#include "calculator_y.h"
+
+int yylex (void);
+void yyerror (char const *s);
+
+#define Z 1234577
+
 %}
-%token VAL
-%token AND
-%token OR
-%token NOT
-%token LNAW
-%token PNAW
-%token END
-%token ERROR
+
+
+
+%token NUM
+%token END ERROR COMM 
+%token ADD SUB MUL DIV MOD POW
+%token LNAW PNAW 
+
+%left ADD SUB
+%left MUL DIV MOD
+
+%type exp
+
 %%
+
 input:
-    | input line
+  %empty
+| input line 
 ;
-line: expe END 	{ printf("Linia %d = %s\n",yylineno-1,($$?"true":"false")); }
-    | error END	{ printf("Błąd składni w linii %d!\n",yylineno-1); }
+
+line:
+  END
+| exp END  { printf("%d\n", $1); }
+| error END { yyerrok; }
 ;
-expe: expt		{ $$ = $1; }
-    | expe OR expt	{ $$ = $1 || $3; }
+
+exp: 
+  NUM
+| exp ADD exp  { $$ = ($1%Z + $3%Z) % Z; }
+| exp SUB exp  { $$ = ($1%Z - $3%Z) % Z; }
+| exp MUL exp  { $$ = ($1%Z * $3%Z) % Z; }
+| exp DIV exp  { 
+      if ($3 == 0) { 
+        yyerror("Dzielenie przez zero!"); 
+      } 
+      $$ = ($1%Z / $3%Z) % Z; 
+    }
+| exp MOD exp  { 
+      if ($3 == 0) { 
+        yyerror("Modulo przez zero!"); 
+      } 
+      $$ = ($1%Z % $3%Z) % Z; 
+    }
+| exp POW exp  { $$ = (int)pow($1, $3) % Z; }
+| LNAW exp PNAW { $$ = $2; }
 ;
-expt: expf		{ $$ = $1; }
-    | expt AND expf	{ $$ = $1 && $3; }
-;
-expf: VAL		
-    | NOT expf 		{ $$ = !$2; }
-    | LNAW expe PNAW	{ $$ = $2; }
-;
+
 %%
-int yyerror(char *s)
-{
+
+void yyerror(char const *s) {
     printf("%s\n",s);	
     return 0;
 }
 
-int main()
-{
-    yyparse();
-    printf("Przetworzono linii: %d\n",yylineno-1);
-    return 0;
+int main (void) {
+  return yyparse();
 }
