@@ -6,7 +6,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "calculator_y.h"
+#include "calculator.tab.h"
 
 int yylex();
 

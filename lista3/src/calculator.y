@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "calculator_y.h"
+#include "calculator.tab.h"
 #define Z 1234577
 
 int yylex (void);
