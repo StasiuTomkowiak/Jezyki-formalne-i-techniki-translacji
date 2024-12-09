@@ -5,6 +5,7 @@
 #include <math.h>
 #include "calculator.tab.h"
 #define Z 1234577
+#define POW 1234576
 
 int yylex (void);
 int yyerror (char  *s);
@@ -14,7 +15,9 @@ char polish_notation[100];
 int to_Z(int x) {
     return ((x % Z) + Z) % Z;
 }
- 
+int to_POW(int x) {
+    return ((x % POW) + POW) % POW;
+}
 int inverse(int a) {
     int m = Z;
     int x = 1;
@@ -74,6 +77,58 @@ int power(int x, int y) {
     }
     return output;
 }
+
+int inverseP(int a) {
+    int m = POW;
+    int x = 1;
+    int y = 0;
+
+    while( a > 1) {
+        int quotient = a / m;
+        int t = m;
+
+        m = a % m;
+        a = t;
+        t = y;
+
+        y = x - quotient * y;
+        x = t;
+    }
+
+    if(x < 0)
+        x += POW;
+
+    return x;
+}
+
+int multiplyP(int x, int y){
+    int output = to_POW(x);
+    for (int i = 1; i < y; i++) {
+        output += x;
+        output = to_POW(output);
+    }
+    return output;
+}
+
+int divideP(int x, int y) {
+    if(y == 0) {
+        yyerror("dzielenie przez zero");
+        return -1;
+    } else {
+        int inv = inverseP(y);
+        return to_POW(multiply(x,inv));
+    }
+}
+
+int moduloP(int x, int y) {
+    if(y == 0) {
+        yyerror("dzielenie przez 0");
+        return -1;
+    } else {
+        return to_POW(to_POW(x) % to_POW(y));
+    }
+}
+
 %}
 
 %token NUM
@@ -123,12 +178,12 @@ exp:
 
 minus_num_pow:
   NUM {$$ = $1;sprintf(polish_notation+ strlen(polish_notation), "%d ", $$);}
-| SUB NUM %prec NEG {$$ = to_Z(to_Z(-1) - to_Z($2));sprintf(polish_notation+ strlen(polish_notation), "%d ", $$);} 
-| minus_num_pow ADD minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "+ ");$$ = to_Z(to_Z($1) + to_Z($3)); }
-| minus_num_pow SUB minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "- ");$$ = to_Z(to_Z($1) - to_Z($3)); }
-| minus_num_pow MUL minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "* ");$$ = multiply($1,$3); }
-| minus_num_pow DIV minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "/ ");$$ = divide($1, $3); if($$ == -1) YYERROR; }
-| minus_num_pow MOD minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "%% ");$$ = modulo($1, $3); if($$ == -1) YYERROR;}
+| SUB NUM %prec NEG {$$ = to_POW(to_POW(0) - to_POW($2));sprintf(polish_notation+ strlen(polish_notation), "%d ", $$);} 
+| minus_num_pow ADD minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "+ ");$$ = to_POW(to_POW($1) + to_POW($3)); }
+| minus_num_pow SUB minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "- ");$$ = to_POW(to_POW($1) - to_POW($3)); }
+| minus_num_pow MUL minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "* ");$$ = multiplyP($1,$3); }
+| minus_num_pow DIV minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "/ ");$$ = divideP($1, $3); if($$ == -1) YYERROR; }
+| minus_num_pow MOD minus_num_pow  { sprintf(polish_notation + strlen(polish_notation), "%% ");$$ = moduloP($1, $3); if($$ == -1) YYERROR;}
 | LNAW minus_num_pow PNAW { $$ = $2; } 
 ;
 %%
