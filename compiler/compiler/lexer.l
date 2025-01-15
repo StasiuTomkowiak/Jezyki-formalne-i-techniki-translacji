@@ -1,17 +1,23 @@
+%option noyywrap
+%option yylineno
+
+
 %{
 #include <iostream>
 #include <string>
 #include <vector>
-#include "parser.h"
+#include "parser.tab.h"
+
+int yylex();
 %}
 
 IDENTIFIER              [_a-z]
-DIGIT                   ([1-9][1-9]*|0)
-PUNCT                   [();,:\[\]]
+
 
 
 %%
-"PROGRAM"               { return PROGRAM; }
+
+"PROGRAM"                    { return PROGRAM; }
 "IS"                    { return IS; }
 "BEGIN"                 { return _BEGIN; }
 "END"                   { return END; }
@@ -31,13 +37,20 @@ PUNCT                   [();,:\[\]]
 "REPEAT"                { return REPEAT; }
 "UNTIL"                 { return UNTIL; }
 "ENDWHILE"              { return ENDWHILE; }
-"ENDDO"                 { return ENDDO; }
 
 "FOR"                   { return FOR; }
 "FROM"                  { return FROM; }
 "TO"                    { return TO; }
 "DOWNTO"                { return DOWNTO; }
 "ENDFOR"                { return ENDFOR; }
+
+";"     { return SEMICOLON; }
+","     { return COMMA; }
+"("     { return LPRNT; }
+")"     { return RPRNT; }
+"["     { return LBRCKT; }
+"]"     { return RBRCKT; }
+":"     { return COLON; }
 
 ":="                    { return ASSIGN; }
 
@@ -49,18 +62,19 @@ PUNCT                   [();,:\[\]]
 ">="                   { return GEQ; }
 
 
-\+                      { return ADD; }
-\-                      { return SUB; }
-\*                      { return MUL; }
-\/                      { return DIV; }
-\%                      { return MOD; }
+"+"                      { return ADD; }
+"-"                      { return SUB; }
+"*"                      { return MUL; }
+"/"                      { return DIV; }
+"%"                      { return MOD; }
 
 {IDENTIFIER}+           { 
                             yylval.pidentifier = new std::string(yytext);
                             return pidentifier;
                         }
-{DIGIT}+                { yylval.NUM = std::stoll(yytext); return NUM; }
-{PUNCT}                 { return yytext; }
+"-"[[:digit:]]+         { yylval.num = -std::stoll(yytext + 1); return num; }
+[[:digit:]]+            { yylval.num = std::stoll(yytext); return num; }
+
 #.*                    ;
 \[.*\]                  ;
 
