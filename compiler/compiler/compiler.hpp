@@ -9,6 +9,21 @@
 #include <vector>
 #include <stack>
 #include <map>
+#include "ST.hpp"
 
 using namespace std;
-void test(char* test);
+
+
+struct variable
+{
+    string name;
+    long int index;
+};
+
+typedef struct variable var;
+
+extern SymbolTable symbolTable;
+
+void end();
+void printCommands();
+void read(const std::string& identifier, SymbolTable& symbolTable);
