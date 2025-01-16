@@ -20,6 +20,33 @@ void read(const std::string& identifier, SymbolTable& symbolTable) {
     }
 }
 
+void write(const std::string& value, const SymbolTable& symbolTable,bool isConstant) {
+      if (isConstant) {
+        // Jeśli to stała liczba
+        commands.push_back("SET " + value + "\n"); // Wartość ustawiana w akumulatorze
+        commands.push_back("PUT 0\n"); // Wypisanie z akumulatora
+        } else {
+        try {
+            // Znajdź symbol w tablicy symboli
+            Symbol symbol = symbolTable.findSymbol(value);
+
+            // Sprawdź typ symbolu
+            if (symbol.type == "variable") {
+                // Generuj instrukcję WRITE dla zmiennej
+                commands.push_back("PUT " + std::to_string(symbol.memoryAddress) + "\n");
+            } else if (symbol.type == "array") {
+                // Jeśli to tablica, zgłoś błąd (brak obsługi wypisywania całej tablicy)
+                throw std::runtime_error("WRITE cannot handle entire arrays directly: " + value);
+            } else {
+                throw std::runtime_error("Unsupported type for WRITE: " + symbol.type);
+            }
+        } catch (const std::runtime_error& e) {
+            // Obsłuż wyjątek, jeśli symbol nie został znaleziony lub jest błędny
+            std::cerr << "Error in WRITE: " << e.what() << std::endl;
+            exit(1);
+        }
+    }
+}
 
 void end()
 {

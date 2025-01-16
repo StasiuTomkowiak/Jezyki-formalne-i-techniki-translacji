@@ -12,6 +12,7 @@ extern FILE *yyin;
 
 int yyerror(const char* err);
 SymbolTable symbolTable; // Globalna tablica symboli
+bool is_constant;
 %}
 
 %union {
@@ -31,6 +32,8 @@ SymbolTable symbolTable; // Globalna tablica symboli
 %type <pidentifier> identifier 
 %token <pidentifier> pidentifier 
 %token <num> num
+%type <num> value
+
 
 %%
 
@@ -55,7 +58,9 @@ command      : identifier ASSIGN expression  SEMICOLON
              | FOR pidentifier FROM value DOWNTO value DO commands ENDFOR
              | proc_call SEMICOLON
              | READ identifier SEMICOLON       {read(*$2, symbolTable);}             
-             | WRITE value SEMICOLON                        
+             | WRITE value SEMICOLON           {    
+                                                        write($2, symbolTable, is_constant); // Obsługa zmiennej
+                                                    }             
 ;
 proc_head    : pidentifier LPRNT args_decl RPRNT
 ;
@@ -117,10 +122,10 @@ condition    : value EQ value
              | value LEQ value
              | value GEQ value
 ;
-value        : num
+value        : num { $$ = $1;is_constant=true; }
              | identifier 
 ;
-identifier:    pidentifier { $$ = $1; }
+identifier:    pidentifier { $$ = $1;is_constant=false; }
              | pidentifier RBRCKT pidentifier LBRCKT 
              | pidentifier RBRCKT num LBRCKT 
 ;

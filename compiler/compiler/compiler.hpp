@@ -27,3 +27,4 @@ extern SymbolTable symbolTable;
 void end();
 void printCommands();
 void read(const std::string& identifier, SymbolTable& symbolTable);
+void write(const std::string& value, const SymbolTable& symbolTable, bool isConstant);
