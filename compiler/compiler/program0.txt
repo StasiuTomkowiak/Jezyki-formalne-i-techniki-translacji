@@ -1,20 +1,8 @@
 # Binarna postać liczby 
 PROGRAM IS
-	n, p[1:5],z 
+	n, z 
 BEGIN
-    READ n;
-	READ p;
 	READ z;
-
-
-    REPEAT
-	p:=n/2;
-	p:=2*p;
-	IF n>p THEN 
-	    WRITE 1;
-	ELSE 
-	    WRITE 0;
-	ENDIF
-	n:=n/2;
-    UNTIL n=0;
+    
+	n:=z+-5;
 END

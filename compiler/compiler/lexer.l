@@ -50,8 +50,8 @@ IDENTIFIER              [_a-z]
 ","                     { std::cout << "(COMMA)" << std::endl; return COMMA; }
 "("                     { std::cout << "(LPRNT)" << std::endl; return LPRNT; }
 ")"                     { std::cout << "(RPRNT)" << std::endl; return RPRNT; }
-"["                     { std::cout << "(LBRCKT)" << std::endl; return LBRCKT; }
-"]"                     { std::cout << "(RBRCKT)" << std::endl; return RBRCKT; }
+"\["                     { std::cout << "(LBRCKT)" << std::endl; return LBRCKT; }
+"\]"                     { std::cout << "(RBRCKT)" << std::endl; return RBRCKT; }
 ":"                     { std::cout << "(COLON)" << std::endl; return COLON; }
 
 ":="                    { std::cout << "(ASSIGN)" << std::endl; return ASSIGN; }
@@ -86,8 +86,6 @@ IDENTIFIER              [_a-z]
                         }
 
 #.*                    ;
-\[.*\]                  ;
-
 [ \t\r\n]+              ;
 .                       { std::cout << "(ERROR: " << yytext << ")" << std::endl; return ERROR; }
 %%

@@ -22,14 +22,17 @@ struct Symbol {
 struct SymbolTable {
     std::unordered_map<std::string, Symbol> table; // Tablica symboli (klucz: nazwa)
     int currentScope = 0;                          // Bieżący poziom zakresu
-    int nextMemoryAddress = 1;                     // Kolejny wolny adres w pamięci
+    int nextMemoryAddress = 1;      
 
     // Metody tablicy symboli
     void addSymbol(const std::string& name, const Symbol& symbol);
+    void addArray(const std::string& name, const Symbol& symbol);
     Symbol findSymbol(const std::string& name) const;
+    int getArrayElementAddress(const std::string& arrayName, int index) const ;
     void removeCurrentScope();
     void enterScope();
     void exitScope();
+    int calculateRangeLength(const Symbol& symbol); 
     void debugPrint() const;
 };
 

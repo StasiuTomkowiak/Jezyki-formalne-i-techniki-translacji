@@ -10,8 +10,35 @@ void SymbolTable::addSymbol(const std::string& name, const Symbol& symbol) {
     newSymbol.scopeLevel = currentScope;
     newSymbol.memoryAddress = nextMemoryAddress;
     table[name] = newSymbol;
+    nextMemoryAddress++;
 }
 
+void SymbolTable::addArray(const std::string& name, const Symbol& symbol) {
+    if (table.find(name) != table.end() && table[name].scopeLevel == currentScope) {
+        throw std::runtime_error("Symbol already declared in current scope: " + name);
+    }
+
+    // Oblicz długość zakresu tablicy
+    int rangeLength = calculateRangeLength(symbol);
+
+    // Przygotuj nowy symbol
+    Symbol newSymbol = symbol;
+    newSymbol.scopeLevel = currentScope;
+    newSymbol.memoryAddress = nextMemoryAddress;
+
+    // Dodaj symbol do tablicy symboli
+    table[name] = newSymbol;
+
+    // Zaktualizuj adres pamięci dla kolejnych symboli
+    nextMemoryAddress += rangeLength;
+}
+
+int SymbolTable::calculateRangeLength(const Symbol& symbol) {
+    if (symbol.type != "array") {
+        throw std::runtime_error("calculateRangeLength called on non-array symbol: " + symbol.name);
+    }
+    return symbol.range.second - symbol.range.first + 1;
+}
 // Wyszukiwanie symbolu
 Symbol SymbolTable::findSymbol(const std::string& name) const {
     auto it = table.find(name);
@@ -19,6 +46,23 @@ Symbol SymbolTable::findSymbol(const std::string& name) const {
         throw std::runtime_error("Symbol not found or out of scope: " + name);
     }
     return it->second;
+}
+int SymbolTable::getArrayElementAddress(const std::string& arrayName, int index) const {
+    Symbol symbol = findSymbol(arrayName);
+
+    if (symbol.type != "array") {
+        throw std::runtime_error(arrayName + " is not an array.");
+    }
+
+    int lowerBound = symbol.range.first;
+    int upperBound = symbol.range.second;
+
+    if (index < lowerBound || index > upperBound) {
+        throw std::runtime_error("Index out of bounds for array " + arrayName);
+    }
+
+    // Adres elementu to adres bazowy + (index - dolna granica)
+    return symbol.memoryAddress + (index - lowerBound);
 }
 
 // Usuwanie symboli z bieżącego zakresu

@@ -12,7 +12,6 @@ extern FILE *yyin;
 
 int yyerror(const char* err);
 SymbolTable symbolTable; // Globalna tablica symboli
-bool is_constant;
 %}
 
 %union {
@@ -25,14 +24,15 @@ bool is_constant;
 %token IF THEN ELSE ENDIF
 %token WHILE DO REPEAT UNTIL ENDWHILE TABLE
 %token FOR FROM TO DOWNTO ENDFOR
-%token SEMICOLON COMMA LPRNT RPRNT LBRCKT RBRCKT COLON
+%token SEMICOLON LPRNT RPRNT LBRCKT RBRCKT COLON COMMA 
 %token ASSIGN EQ NEQ LE GE LEQ GEQ
 %token ADD SUB MUL DIV MOD
 %token ERROR 
 %type <pidentifier> identifier 
 %token <pidentifier> pidentifier 
 %token <num> num
-%type <num> value
+%type <pidentifier> value
+
 
 
 %%
@@ -49,7 +49,7 @@ main         : PROGRAM IS declarations _BEGIN commands END                      
 commands     : commands command                                                     
              | command
 ;
-command      : identifier ASSIGN expression  SEMICOLON
+command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, symbolTable);}
              | IF condition THEN commands ELSE commands ENDIF
              | IF condition THEN commands ENDIF
              | WHILE condition DO commands ENDWHILE
@@ -58,9 +58,7 @@ command      : identifier ASSIGN expression  SEMICOLON
              | FOR pidentifier FROM value DOWNTO value DO commands ENDFOR
              | proc_call SEMICOLON
              | READ identifier SEMICOLON       {read(*$2, symbolTable);}             
-             | WRITE value SEMICOLON           {    
-                                                        write($2, symbolTable, is_constant); // Obsługa zmiennej
-                                                    }             
+             | WRITE value SEMICOLON           { write(*$2, symbolTable); }
 ;
 proc_head    : pidentifier LPRNT args_decl RPRNT
 ;
@@ -75,14 +73,14 @@ declarations : declarations  COMMA pidentifier {
                 symbolTable.addSymbol(*$3, newSymbol);}
     
 
-             | declarations  COMMA pidentifier RBRCKT num COLON num LBRCKT {
+             | declarations  COMMA pidentifier LBRCKT num COLON num RBRCKT {
                 Symbol newSymbol;
                 newSymbol.name = *$3;
                 newSymbol.type = "array";
                 newSymbol.range={$5, $7};
                 newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol.scopeLevel = symbolTable.currentScope;
-                symbolTable.addSymbol(*$3, newSymbol);}
+                symbolTable.addArray(*$3, newSymbol);}
              | pidentifier
              {
                 Symbol newSymbol;
@@ -91,14 +89,15 @@ declarations : declarations  COMMA pidentifier {
                 newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addSymbol(*$1, newSymbol);}
-             | pidentifier RBRCKT num COLON num LBRCKT {
+
+             | pidentifier LBRCKT num COLON num RBRCKT {
                 Symbol newSymbol;
                 newSymbol.name = *$1;
                 newSymbol.type = "array";
                 newSymbol.range={$3, $5};
                 newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol.scopeLevel = symbolTable.currentScope;
-                symbolTable.addSymbol(*$1, newSymbol);}
+                symbolTable.addArray(*$1, newSymbol);}
 ;
 args_decl    : args_decl  COMMA pidentifier
              | args_decl COMMA TABLE pidentifier 
@@ -109,7 +108,7 @@ args         : args  COMMA pidentifier
              | pidentifier
 ;
 expression   : value
-             | value ADD value
+             | value ADD value   {add(*$1,*$3, symbolTable);}
              | value SUB value
              | value MUL value
              | value DIV value
@@ -122,12 +121,12 @@ condition    : value EQ value
              | value LEQ value
              | value GEQ value
 ;
-value        : num { $$ = $1;is_constant=true; }
-             | identifier 
+value        : num           { $$ = new std::string(std::to_string($1)); }
+             | identifier      { $$ = $1; }
 ;
-identifier:    pidentifier { $$ = $1;is_constant=false; }
-             | pidentifier RBRCKT pidentifier LBRCKT 
-             | pidentifier RBRCKT num LBRCKT 
+identifier:    pidentifier { $$ = $1; }
+             | pidentifier LBRCKT pidentifier RBRCKT 
+             | pidentifier LBRCKT num RBRCKT 
 ;
 %%
 int main(int argc, char* argv[]) {
