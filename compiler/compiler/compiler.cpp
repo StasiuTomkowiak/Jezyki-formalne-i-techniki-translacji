@@ -79,16 +79,58 @@ void add(const std::string& value1, const std::string& value2,const SymbolTable&
             commands.push_back("SET " + std::to_string(number2) + "\n");
             commands.push_back("ADD " + std::to_string(symbol1.memoryAddress) + "\n");
             }
-        } catch (const std::invalid_argument&) {
+        } catch (const std::runtime_error&) {
             try {
                 Symbol symbol2 = symbolTable.findSymbol(value2);
                 if (symbol2.type == "variable" ) {
-                int number1 = std::stoi(value1); // Konwertuj na liczbę
-                commands.push_back("SET " + std::to_string(number1) + "\n");
-                commands.push_back("ADD " + std::to_string(symbol2.memoryAddress) + "\n");
-            } }catch (const std::invalid_argument&) {
-            std::cerr << "Error in WRITE: Invalid value \"" << "\"\n";
-            exit(1);
+                    int number1 = std::stoi(value1); // Konwertuj na liczbę
+                    commands.push_back("SET " + std::to_string(number1) + "\n");
+                    commands.push_back("ADD " + std::to_string(symbol2.memoryAddress) + "\n");
+                } 
+            }catch (const std::runtime_error&) {
+                    int number1 = std::stoi(value1);
+                    int number2 = std::stoi(value2);
+                    int result= number1+number2;
+                    commands.push_back("SET " + std::to_string(result) + "\n");
+            }
+        }}
+    
+}
+
+void sub(const std::string& value1, const std::string& value2,const SymbolTable& symbolTable) {
+    try {
+        // Spróbuj znaleźć symbol w tablicy symboli
+        Symbol symbol1 = symbolTable.findSymbol(value1);
+        Symbol symbol2 = symbolTable.findSymbol(value2);
+
+        // Sprawdź typ symbolu i wygeneruj odpowiednią komendę
+        if (symbol1.type == "variable" && symbol1.type == "variable") {
+            commands.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
+            commands.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
+        }
+    } catch (const std::runtime_error&) {
+        // Jeśli symbol nie został znaleziony, załóż, że to liczba
+        try {
+            Symbol symbol1 = symbolTable.findSymbol(value1);
+            if (symbol1.type == "variable" ) {
+            int number2 = std::stoi(value2); // Konwertuj na liczbę
+            number2 = (-1)*number2;
+            commands.push_back("SET " + std::to_string(number2) + "\n");
+            commands.push_back("ADD " + std::to_string(symbol1.memoryAddress) + "\n");
+            }
+        } catch (const std::runtime_error&) {
+            try {
+                Symbol symbol2 = symbolTable.findSymbol(value2);
+                if (symbol2.type == "variable" ) {
+                    int number1 = std::stoi(value1); // Konwertuj na liczbę
+                    commands.push_back("SET " + std::to_string(number1) + "\n");
+                    commands.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
+                } 
+            }catch (const std::runtime_error&) {
+                    int number1 = std::stoi(value1);
+                    int number2 = std::stoi(value2);
+                    int result= number1-number2;
+                    commands.push_back("SET " + std::to_string(result) + "\n");
             }
         }}
     

@@ -74,14 +74,10 @@ IDENTIFIER              [_a-z]
                             yylval.pidentifier = new std::string(yytext);
                             return pidentifier;
                         }
-"-"[[:digit:]]+         { 
-                            std::cout << "(NUMBER: " << yytext << ")" << std::endl;
-                            yylval.num = -std::stoll(yytext + 1); 
-                            return num; 
-                        }
+
 [[:digit:]]+            { 
                             std::cout << "(NUMBER: " << yytext << ")" << std::endl;
-                            yylval.num = std::stoll(yytext); 
+                            yylval.num= std::stoll(yytext); 
                             return num; 
                         }
 

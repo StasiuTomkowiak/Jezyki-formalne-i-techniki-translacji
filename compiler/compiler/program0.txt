@@ -1,8 +1,16 @@
 # Binarna postać liczby 
 PROGRAM IS
-	n, z 
+	 x[-10:10],n,p 
 BEGIN
-	READ z;
-    
-	n:=z+-5;
+	READ n;
+    REPEAT
+	p:=n--2;
+	p:=n+-5;
+	IF n>p THEN
+		WRITE 1;
+	ELSE 
+	WRITE 0;
+	ENDIF
+	n:=n/2;
+	UNTIL n=0;
 END

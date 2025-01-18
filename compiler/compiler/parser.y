@@ -31,6 +31,7 @@ SymbolTable symbolTable; // Globalna tablica symboli
 %type <pidentifier> identifier 
 %token <pidentifier> pidentifier 
 %token <num> num
+%type  <num> minnum
 %type <pidentifier> value
 
 
@@ -71,9 +72,8 @@ declarations : declarations  COMMA pidentifier {
                 newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addSymbol(*$3, newSymbol);}
-    
 
-             | declarations  COMMA pidentifier LBRCKT num COLON num RBRCKT {
+             | declarations  COMMA pidentifier LBRCKT minnum COLON minnum RBRCKT {
                 Symbol newSymbol;
                 newSymbol.name = *$3;
                 newSymbol.type = "array";
@@ -81,8 +81,8 @@ declarations : declarations  COMMA pidentifier {
                 newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addArray(*$3, newSymbol);}
-             | pidentifier
-             {
+
+             | pidentifier  {
                 Symbol newSymbol;
                 newSymbol.name = *$1;
                 newSymbol.type = "variable";
@@ -90,7 +90,7 @@ declarations : declarations  COMMA pidentifier {
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addSymbol(*$1, newSymbol);}
 
-             | pidentifier LBRCKT num COLON num RBRCKT {
+             | pidentifier LBRCKT minnum COLON minnum RBRCKT {
                 Symbol newSymbol;
                 newSymbol.name = *$1;
                 newSymbol.type = "array";
@@ -109,7 +109,7 @@ args         : args  COMMA pidentifier
 ;
 expression   : value
              | value ADD value   {add(*$1,*$3, symbolTable);}
-             | value SUB value
+             | value SUB value   {sub(*$1,*$3, symbolTable);}
              | value MUL value
              | value DIV value
              | value MOD value
@@ -121,12 +121,15 @@ condition    : value EQ value
              | value LEQ value
              | value GEQ value
 ;
-value        : num           { $$ = new std::string(std::to_string($1)); }
+value        : minnum          { $$ = new std::string(std::to_string($1)); }
              | identifier      { $$ = $1; }
+;
+minnum       : num           { $$ = $1;}
+             | SUB num       { $$ = (-1)*$2; } 
 ;
 identifier:    pidentifier { $$ = $1; }
              | pidentifier LBRCKT pidentifier RBRCKT 
-             | pidentifier LBRCKT num RBRCKT 
+             | pidentifier LBRCKT minnum RBRCKT 
 ;
 %%
 int main(int argc, char* argv[]) {
