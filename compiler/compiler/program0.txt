@@ -3,14 +3,11 @@ PROGRAM IS
 	 x[-10:10],n,p 
 BEGIN
 	READ n;
-    REPEAT
-	p:=n--2;
-	p:=n+-5;
-	IF n>p THEN
-		WRITE 1;
-	ELSE 
-	WRITE 0;
+	IF 2>p THEN
+	p:=n+2;
+	p:=5-n;
 	ENDIF
-	n:=n/2;
-	UNTIL n=0;
+	WRITE 1;
+	
+	WRITE 0;
 END

@@ -12,11 +12,15 @@ extern FILE *yyin;
 
 int yyerror(const char* err);
 SymbolTable symbolTable; // Globalna tablica symboli
+std::vector<std::string> cmd;
 %}
 
 %union {
     int num;
     std::string* pidentifier;
+    std::vector<std::string>* condition;
+    std::vector<std::string>* commands;
+    std::vector<std::string>* expression;
 }
 
 %token PROGRAM IS _BEGIN END PROCEDURE DECLARE
@@ -32,8 +36,11 @@ SymbolTable symbolTable; // Globalna tablica symboli
 %token <pidentifier> pidentifier 
 %token <num> num
 %type  <num> minnum
+%type  <condition> condition
 %type <pidentifier> value
-
+%type <commands> commands
+%type <commands> command
+%type <expression> expression
 
 
 %%
@@ -44,22 +51,27 @@ procedures   : procedures PROCEDURE proc_head IS declarations _BEGIN commands EN
              | procedures PROCEDURE proc_head IS _BEGIN commands END                {}
              | 
 ;
-main         : PROGRAM IS declarations _BEGIN commands END                           {end();}
-             | PROGRAM IS _BEGIN commands END                                       {end();}
+main         : PROGRAM IS declarations _BEGIN commands END                           {cmd = *merge(*$5, end());}
+             | PROGRAM IS _BEGIN commands END                                       {cmd = *merge(*$4,end());}
 ;
-commands     : commands command                                                     
-             | command
+commands     : commands command   { $$ = new std::vector<std::string>(*merge(*$1, *$2));}                                                  
+             | command            { $$= new std::vector<std::string>(*($1)); }  
 ;
-command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, symbolTable);}
+command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std::string>(*merge(*$3, assign(*$1, symbolTable)));}
              | IF condition THEN commands ELSE commands ENDIF
-             | IF condition THEN commands ENDIF
+             | IF condition THEN commands ENDIF  {
+                    std::vector<std::string> temp2(*$4);
+                    int n=temp2.size();
+                    std::vector<std::string> temp1(if_then(*$2,n,symbolTable));
+                    $$ = new std::vector<std::string>(*merge(temp1,temp2));
+             }
              | WHILE condition DO commands ENDWHILE
              | REPEAT commands UNTIL condition SEMICOLON
              | FOR pidentifier FROM value TO value DO commands ENDFOR
              | FOR pidentifier FROM value DOWNTO value DO commands ENDFOR
              | proc_call SEMICOLON
-             | READ identifier SEMICOLON       {read(*$2, symbolTable);}             
-             | WRITE value SEMICOLON           { write(*$2, symbolTable); }
+             | READ identifier SEMICOLON       {$$= new std::vector<std::string>(read(*$2, symbolTable));}             
+             | WRITE value SEMICOLON           { $$ =  new std::vector<std::string>(write(*$2, symbolTable)); }
 ;
 proc_head    : pidentifier LPRNT args_decl RPRNT
 ;
@@ -108,18 +120,18 @@ args         : args  COMMA pidentifier
              | pidentifier
 ;
 expression   : value
-             | value ADD value   {add(*$1,*$3, symbolTable);}
-             | value SUB value   {sub(*$1,*$3, symbolTable);}
+             | value ADD value   {$$ =  new std::vector<std::string>(add(*($1), *($3), symbolTable));}
+             | value SUB value   {$$ =  new std::vector<std::string>(sub(*($1), *($3), symbolTable));}
              | value MUL value
              | value DIV value
              | value MOD value
 ;
-condition    : value EQ value
-             | value NEQ value 
-             | value LE value
-             | value GE value
-             | value LEQ value
-             | value GEQ value
+condition    : value EQ value     {$$ = new std::vector<std::string>{*($1), *($3), "EQ"};}
+             | value NEQ value    {$$ = new std::vector<std::string>{*($1), *($3), "NEQ"};}
+             | value LE value     {$$ = new std::vector<std::string>{*($3), *($1), "GE"};}
+             | value GE value     {$$ = new std::vector<std::string>{*($1), *($3), "GE"};} 
+             | value LEQ value    {$$ = new std::vector<std::string>{*($3), *($1), "GEQ"};}
+             | value GEQ value    {$$ = new std::vector<std::string>{*($1), *($3), "GEQ"};} 
 ;
 value        : minnum          { $$ = new std::string(std::to_string($1)); }
              | identifier      { $$ = $1; }
@@ -143,7 +155,7 @@ int main(int argc, char* argv[]) {
 
     if (yyparse() == 0) {
         std::cout << "Parsing successful!" << std::endl;
-        printCommands();
+        printCommands(cmd);
     } else {
         std::cerr << "Parsing failed!" << std::endl;
     }
