@@ -1,13 +1,15 @@
-# Binarna postać liczby 
+
 PROGRAM IS
-	 x[-10:10],n,p 
+	 n,p 
 BEGIN
 	READ n;
-	IF 2>p THEN
-	p:=n+2;
-	p:=5-n;
-	ENDIF
+	REPEAT
+	IF n>=p THEN
 	WRITE 1;
-	
+	ELSE
 	WRITE 0;
+	ENDIF
+	n:=n-2;
+	UNTIL n!=0;
+
 END

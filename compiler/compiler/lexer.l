@@ -8,7 +8,6 @@
 #include <vector>
 #include "parser.h"
 
-
 int yylex();
 %}
 

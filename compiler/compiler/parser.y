@@ -58,15 +58,52 @@ commands     : commands command   { $$ = new std::vector<std::string>(*merge(*$1
              | command            { $$= new std::vector<std::string>(*($1)); }  
 ;
 command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std::string>(*merge(*$3, assign(*$1, symbolTable)));}
-             | IF condition THEN commands ELSE commands ENDIF
+             | IF condition THEN commands ELSE commands ENDIF{
+                    std::vector<std::string> temp1(*$4);
+                    std::vector<std::string> temp2(*$6);
+                    int first=temp1.size();
+                    int second=temp2.size();
+                    std::vector<std::string> cond(*$2);
+                    std::vector<std::string> temp3(if_then_else(*$2,first,second,symbolTable));
+                    std::vector<std::string> result;
+                    if(cond[2]=="EQ"||cond[2]=="GE"){
+                    result.insert(result.end(), temp3.begin(), temp3.end() - 1);
+                    result.insert(result.end(), temp2.begin(), temp2.end());
+                    result.push_back(temp3.back());
+                    result.insert(result.end(), temp1.begin(), temp1.end());
+                    }else if (cond[2]=="NEQ"||cond[2]=="GEQ"){
+                    result.insert(result.end(), temp3.begin(), temp3.end() - 1);
+                    result.insert(result.end(), temp1.begin(), temp1.end());
+                    result.push_back(temp3.back());
+                    result.insert(result.end(), temp2.begin(), temp2.end());
+                    }
+                    $$ = new std::vector<std::string>(result);
+             }
              | IF condition THEN commands ENDIF  {
                     std::vector<std::string> temp2(*$4);
                     int n=temp2.size();
                     std::vector<std::string> temp1(if_then(*$2,n,symbolTable));
                     $$ = new std::vector<std::string>(*merge(temp1,temp2));
              }
-             | WHILE condition DO commands ENDWHILE
-             | REPEAT commands UNTIL condition SEMICOLON
+             | WHILE condition DO commands ENDWHILE{
+                std::vector<std::string> temp2(*$4);
+                int n=temp2.size();
+                std::vector<std::string> temp1(if_then(*$2,n,symbolTable));
+                std::vector<std::string> temp3(*merge(temp1,temp2));
+                n=temp3.size();
+                temp3.push_back("JUMP "+to_string(-n)+"\n");
+                $$ = new std::vector<std::string>(temp3);
+             }
+             | REPEAT commands UNTIL condition SEMICOLON {
+                std::vector<std::string> temp2(*$2);
+                int n=temp2.size();
+                std::vector<std::string> temp1(if_then(*$4,1,symbolTable));
+                std::vector<std::string> temp3(*merge(temp2,temp1));
+                n=temp3.size();
+                temp3.push_back("JUMP "+to_string(-n)+"\n");
+                $$ = new std::vector<std::string>(temp3);
+
+             }
              | FOR pidentifier FROM value TO value DO commands ENDFOR
              | FOR pidentifier FROM value DOWNTO value DO commands ENDFOR
              | proc_call SEMICOLON
