@@ -104,8 +104,61 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 $$ = new std::vector<std::string>(temp3);
 
              }
-             | FOR pidentifier FROM value TO value DO commands ENDFOR
-             | FOR pidentifier FROM value DOWNTO value DO commands ENDFOR
+             | FOR pidentifier FROM value TO value DO commands ENDFOR{
+                std::vector<std::string> temp1(*$8);
+                
+                // add symbol
+                Symbol newSymbol;
+                newSymbol.name = *$2;
+                newSymbol.type = "variable";
+                newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
+                newSymbol.scopeLevel = symbolTable.currentScope;
+                symbolTable.addSymbol(*$2, newSymbol);
+
+                std::vector<std::string>* temp2=new std::vector<std::string>();
+                temp2->push_back("SET " + *$4+"\n");
+                temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+                std::vector<std::string>* temp3 = new std::vector<std::string>();
+                temp3->push_back(*$6);
+                temp3->push_back(*$2);
+                temp3->push_back("GEQ");
+                temp1=(*merge(temp1,for_to(*$2, symbolTable)));
+                int n=temp1.size();
+                temp1=(*merge(temp1,if_then(*temp3,1,symbolTable)));
+                n=temp1.size();
+                temp1.push_back("JUMP "+to_string(-n)+"\n");
+                temp1=*merge(*temp2,temp1);
+                $$ = new std::vector<std::string>(temp1);
+
+
+             }
+             | FOR pidentifier FROM value DOWNTO value DO commands ENDFOR{
+                 std::vector<std::string> temp1(*$8);
+                
+                // add symbol
+                Symbol newSymbol;
+                newSymbol.name = *$2;
+                newSymbol.type = "variable";
+                newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
+                newSymbol.scopeLevel = symbolTable.currentScope;
+                symbolTable.addSymbol(*$2, newSymbol);
+
+                std::vector<std::string>* temp2=new std::vector<std::string>();
+                temp2->push_back("SET " + *$4+"\n");
+                temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+                std::vector<std::string>* temp3 = new std::vector<std::string>();
+                temp3->push_back(*$2);
+                temp3->push_back(*$6);
+                temp3->push_back("GEQ");
+                temp1=(*merge(temp1,for_downto(*$2, symbolTable)));
+                int n=temp1.size();
+                temp1=(*merge(temp1,if_then(*temp3,1,symbolTable)));
+                n=temp1.size();
+                temp1.push_back("JUMP "+to_string(-n)+"\n");
+                temp1=*merge(*temp2,temp1);
+                $$ = new std::vector<std::string>(temp1);
+
+             }
              | proc_call SEMICOLON
              | READ identifier SEMICOLON       {$$= new std::vector<std::string>(read(*$2, symbolTable));}             
              | WRITE value SEMICOLON           { $$ =  new std::vector<std::string>(write(*$2, symbolTable)); }
@@ -156,7 +209,7 @@ args_decl    : args_decl  COMMA pidentifier
 args         : args  COMMA pidentifier
              | pidentifier
 ;
-expression   : value
+expression   : value             {$$ =  new std::vector<std::string>(value_e(*($1), symbolTable));}  
              | value ADD value   {$$ =  new std::vector<std::string>(add(*($1), *($3), symbolTable));}
              | value SUB value   {$$ =  new std::vector<std::string>(sub(*($1), *($3), symbolTable));}
              | value MUL value

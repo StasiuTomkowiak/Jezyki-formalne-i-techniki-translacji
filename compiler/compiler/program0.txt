@@ -3,13 +3,14 @@ PROGRAM IS
 	 n,p 
 BEGIN
 	READ n;
-	REPEAT
-	IF n>=p THEN
-	WRITE 1;
-	ELSE
+	READ p;
+	FOR i FROM 1 TO 10 DO
+	IF n>p THEN 
 	WRITE 0;
+	p:=p+1;
+	ELSE 
+	WRITE 1;
+	p:=p+1;
 	ENDIF
-	n:=n-2;
-	UNTIL n!=0;
-
+	ENDFOR
 END

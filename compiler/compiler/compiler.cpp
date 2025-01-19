@@ -103,6 +103,23 @@ std::vector<std::string> if_then_else(const std::vector<std::string>& condition,
     return result;
 }
 
+std::vector<std::string> for_to(const std::string& identifier,const SymbolTable& symbolTable){
+    std::vector<std::string> result;
+    Symbol symbol1 = symbolTable.findSymbol(identifier);
+    result=add(identifier,"1",symbolTable);
+    result.push_back("STORE " +std::to_string(symbol1.memoryAddress)  + "\n");
+    return result;
+}
+
+std::vector<std::string> for_downto(const std::string& identifier,const SymbolTable& symbolTable){
+    std::vector<std::string> result;
+    Symbol symbol1 = symbolTable.findSymbol(identifier);
+    result=sub(identifier,"1",symbolTable);
+    result.push_back("STORE " +std::to_string(symbol1.memoryAddress)  + "\n");
+    
+    return result;
+}
+
 
 std::vector<std::string> add(const std::string& value1, const std::string& value2, const SymbolTable& symbolTable) {
     std::vector<std::string> result;
@@ -129,8 +146,9 @@ std::vector<std::string> add(const std::string& value1, const std::string& value
         int number2 = std::stoi(value2);
         try {
             Symbol symbol1 = symbolTable.findSymbol(value1);
-            result.push_back("SET" + std::to_string(number2)  + "\n");
+            result.push_back("SET " + std::to_string(number2)  + "\n");
             result.push_back("ADD " +std::to_string(symbol1.memoryAddress)  + "\n");
+            
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in ADD: " << e.what() << "\n";
             exit(1);
@@ -191,7 +209,22 @@ std::vector<std::string> sub(const std::string& value1, const std::string& value
 
     return result;
 }
-
+std::vector<std::string> value_e(const std::string& value1,const SymbolTable& symbolTable){
+    std::vector<std::string> result;
+    if (isNumber(value1)){
+        result.push_back("SET " + value1 + "\n");
+    }else {
+        try {
+            Symbol symbol1 = symbolTable.findSymbol(value1);
+            result.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
+        } catch (const std::runtime_error& e) {
+            std::cerr << "Error in SUB: " << e.what() << "\n";
+            exit(1);
+        }
+    }
+        return result;
+   
+}
 std::vector<std::string> end()
 {
     std::vector<std::string> result;
