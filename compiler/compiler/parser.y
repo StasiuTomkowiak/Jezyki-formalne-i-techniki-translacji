@@ -13,6 +13,8 @@ extern FILE *yyin;
 int yyerror(const char* err);
 SymbolTable symbolTable; // Globalna tablica symboli
 std::vector<std::string> cmd;
+std::vector<std::string> array_index;
+
 %}
 
 %union {
@@ -57,7 +59,7 @@ main         : PROGRAM IS declarations _BEGIN commands END                      
 commands     : commands command   { $$ = new std::vector<std::string>(*merge(*$1, *$2));}                                                  
              | command            { $$= new std::vector<std::string>(*($1)); }  
 ;
-command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std::string>(*merge(*$3, assign(*$1, symbolTable)));}
+command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std::string>(*merge(*$3, assign(*$1, array_index,  symbolTable)));}
              | IF condition THEN commands ELSE commands ENDIF{
                     std::vector<std::string> temp1(*$4);
                     std::vector<std::string> temp2(*$6);
@@ -97,7 +99,7 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
              | REPEAT commands UNTIL condition SEMICOLON {
                 std::vector<std::string> temp2(*$2);
                 int n=temp2.size();
-                std::vector<std::string> temp1(if_then(*$4,1,symbolTable));
+                std::vector<std::string> temp1(repeat_until(*$4,1,symbolTable));
                 std::vector<std::string> temp3(*merge(temp2,temp1));
                 n=temp3.size();
                 temp3.push_back("JUMP "+to_string(-n)+"\n");
@@ -122,7 +124,7 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 temp3->push_back(*$6);
                 temp3->push_back(*$2);
                 temp3->push_back("GEQ");
-                temp1=(*merge(temp1,for_to(*$2, symbolTable)));
+                temp1=(*merge(temp1,for_to(*$2,array_index, symbolTable)));
                 int n=temp1.size();
                 temp1=(*merge(temp1,if_then(*temp3,1,symbolTable)));
                 n=temp1.size();
@@ -143,10 +145,14 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addSymbol(*$2, newSymbol);
 
+
                 std::vector<std::string>* temp2=new std::vector<std::string>();
                 temp2->push_back("SET " + *$4+"\n");
                 temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+                temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+
                 std::vector<std::string>* temp3 = new std::vector<std::string>();
+
                 temp3->push_back(*$2);
                 temp3->push_back(*$6);
                 temp3->push_back("GEQ");
@@ -160,8 +166,8 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
 
              }
              | proc_call SEMICOLON
-             | READ identifier SEMICOLON       {$$= new std::vector<std::string>(read(*$2, symbolTable));}             
-             | WRITE value SEMICOLON           { $$ =  new std::vector<std::string>(write(*$2, symbolTable)); }
+             | READ identifier SEMICOLON       {$$= new std::vector<std::string>(read(*$2,array_index, symbolTable));}             
+             | WRITE value SEMICOLON           { $$ =  new std::vector<std::string>(write(*$2,array_index, symbolTable)); }
 ;
 proc_head    : pidentifier LPRNT args_decl RPRNT
 ;
@@ -209,8 +215,8 @@ args_decl    : args_decl  COMMA pidentifier
 args         : args  COMMA pidentifier
              | pidentifier
 ;
-expression   : value             {$$ =  new std::vector<std::string>(value_e(*($1), symbolTable));}  
-             | value ADD value   {$$ =  new std::vector<std::string>(add(*($1), *($3), symbolTable));}
+expression   : value             {$$ =  new std::vector<std::string>(value_e(*($1), array_index,symbolTable));}  
+             | value ADD value   {$$ =  new std::vector<std::string>(add(*($1), *($3), array_index,symbolTable));}
              | value SUB value   {$$ =  new std::vector<std::string>(sub(*($1), *($3), symbolTable));}
              | value MUL value
              | value DIV value
@@ -230,8 +236,8 @@ minnum       : num           { $$ = $1;}
              | SUB num       { $$ = (-1)*$2; } 
 ;
 identifier:    pidentifier { $$ = $1; }
-             | pidentifier LBRCKT pidentifier RBRCKT 
-             | pidentifier LBRCKT minnum RBRCKT 
+             | pidentifier LBRCKT pidentifier RBRCKT { array_index.push_back(*$3); $$ = $1;  } 
+             | pidentifier LBRCKT minnum RBRCKT { array_index.push_back(std::to_string($3)); $$ = $1;  }
 ;
 %%
 int main(int argc, char* argv[]) {
@@ -245,7 +251,7 @@ int main(int argc, char* argv[]) {
 
     if (yyparse() == 0) {
         std::cout << "Parsing successful!" << std::endl;
-        printCommands(cmd);
+        printCommands(cmd);        
     } else {
         std::cerr << "Parsing failed!" << std::endl;
     }

@@ -1,16 +1,10 @@
-
 PROGRAM IS
 	 n,p 
 BEGIN
 	READ n;
-	READ p;
-	FOR i FROM 1 TO 10 DO
-	IF n>p THEN 
+
+	REPEAT 
 	WRITE 0;
-	p:=p+1;
-	ELSE 
-	WRITE 1;
-	p:=p+1;
-	ENDIF
-	ENDFOR
+	n:=n-1;
+	UNTIL n!=0;
 END

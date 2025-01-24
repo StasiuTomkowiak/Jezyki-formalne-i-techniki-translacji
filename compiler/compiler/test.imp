@@ -1,0 +1,18 @@
+PROGRAM IS
+	 n[-1:1],p[2:8] 
+BEGIN
+    IF 5>4 THEN
+    READ p[3];
+    n[-1]:=5+1;
+    n[0]:=n[-1]+p[3];
+    n[1]:=n[-1]+10;
+
+    WRITE n[-1];
+    WRITE n[0];
+
+    WRITE n[1];
+    WRITE p[3];
+    n[1]:=p[3];
+    WRITE n[1];
+    ENDIF
+END

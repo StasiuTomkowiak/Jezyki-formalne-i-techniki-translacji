@@ -18,17 +18,22 @@ using namespace std;
 extern SymbolTable symbolTable;
 
 
-std::vector<std::string> assign(const std::string& identifier, SymbolTable& symbolTable);
+std::vector<std::string> assign(const std::string& identifier,std::vector<std::string>& array_index, SymbolTable& symbolTable);
 std::vector<std::string> if_then(const std::vector<std::string>& condition,int n,const SymbolTable& symbolTable);
 std::vector<std::string> if_then_else(const std::vector<std::string>& condition,int first,int second,const SymbolTable& symbolTable);
-std::vector<std::string> for_to(const std::string& identifier,const SymbolTable& symbolTable);
+std::vector<std::string> repeat_until(const std::vector<std::string>& condition,int n,const SymbolTable& symbolTable);
+std::vector<std::string> for_to(const std::string& identifier,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
 std::vector<std::string> for_downto(const std::string& identifier,const SymbolTable& symbolTable);
-std::vector<std::string> read(const std::string& identifier, SymbolTable& symbolTable);
-std::vector<std::string> write(const std::string& value, const SymbolTable& symbolTable);
+std::vector<std::string> read(const std::string& identifier,std::vector<std::string>& array_index, SymbolTable& symbolTable);
+std::vector<std::string> write(const std::string& value,std::vector<std::string>& array_index, const SymbolTable& symbolTable);
+std::vector<std::string> read_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
+std::vector<std::string> write_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
+string index_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
 
-std::vector<std::string> value_e(const std::string& value1,const SymbolTable& symbolTable);
-std::vector<std::string> add(const std::string& value1, const std::string& value2,const SymbolTable& symbolTable);
-std::vector<std::string> sub(const std::string& value1, const std::string& value2,const SymbolTable& symbolTable);
+
+std::vector<std::string> value_e(const std::string& value1,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
+std::vector<std::string> add(const std::string& value1, const std::string& value2,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
+std::vector<std::string> sub(const std::string& value1, const std::string& value2,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
 
 std::vector<std::string> end();
 
@@ -36,3 +41,4 @@ std::vector<std::string>* merge(const std::vector<std::string>& vec1, const std:
 
 bool isNumber(const std::string& s);
 void printCommands(std::vector<std::string> result);
+std::vector<std::string> assign_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
