@@ -1,18 +1,44 @@
 PROGRAM IS
-	 n[-1:1],p[2:8] 
+a, b, c, d, e, f, g, tab[1:5]
 BEGIN
-    IF 5>4 THEN
-    READ p[3];
-    n[-1]:=5+1;
-    n[0]:=n[-1]+p[3];
-    n[1]:=n[-1]+10;
+    # Przypisanie wartości do zmiennych i tablicy
+    a := 10;
+    b := 20;
+    tab[1] := 30;
+    tab[2] := 40;
+    tab[3] := 50;
 
-    WRITE n[-1];
-    WRITE n[0];
+    # 1. Warunek z prostym porównaniem
+    IF a < b THEN
+        c := b - a; # Odejmowanie
+        WRITE c; # Powinno wypisać 10
+    ENDIF
 
-    WRITE n[1];
-    WRITE p[3];
-    n[1]:=p[3];
-    WRITE n[1];
+    # 2. Warunek z tablicą
+    IF tab[2] > tab[1] THEN
+        d := tab[2] + a; # Dodawanie
+        WRITE d; # Powinno wypisać 50
+    ENDIF
+
+    # 3. Warunek z porównaniem i dodawaniem w kilku krokach
+    IF 31> tab[1] THEN
+        e := a + b; # Dodanie dwóch liczb
+        e := e + tab[3]; # Dodanie wartości z tablicy
+        WRITE e; # Powinno wypisać 80
+    ENDIF
+
+    # 4. Zagnieżdżone IF THEN
+    IF tab[3] > tab[1] THEN
+        IF b > a THEN
+            f := tab[3] - tab[1]; # Odejmowanie
+            WRITE f; # Powinno wypisać 20
+        ENDIF
+    ENDIF
+
+    # 5. Warunek negatywny z odejmowaniem w krokach
+    IF 30<= tab[2] THEN
+        g := a + b; # Dodanie
+        g := tab[2] - g; # Odejmowanie
+        WRITE g; # Powinno wypisać 10
     ENDIF
 END

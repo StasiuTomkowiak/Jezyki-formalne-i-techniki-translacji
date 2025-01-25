@@ -6,25 +6,28 @@ std::vector<std::string> read(const std::string& identifier, std::vector<std::st
     try {
         // Sprawdź, czy zmienna istnieje
         Symbol symbol = symbolTable.findSymbol(identifier);
+        int n=array_index.size();
 
          if (symbol.type == "variable") {
-                result.push_back("GET" + std::to_string(symbol.memoryAddress) + "\n");
+                result.push_back("GET " + std::to_string(symbol.memoryAddress) + "\n");
 
             }
         else if (symbol.type == "array") {
-                result=read_array( array_index, 0 ,1,symbol.range,symbol.memoryAddress);
-                array_index.clear();
+                result=read_array( array_index, n-1 ,1,symbol.range,symbol.memoryAddress);
+                
             }
     } catch (const std::runtime_error& e) {
         // Jeśli zmienna nie istnieje, zgłoś błąd
         std::cerr << "Error: Variable '" << identifier << "' not declared.\n";
         exit(1); // Możesz zastąpić bardziej eleganckim zarządzaniem błędami
     }
+    array_index.pop_back();
     return result;
 }
 
 std::vector<std::string> write(const std::string& value,std::vector<std::string>& array_index, const SymbolTable& symbolTable) {
     std::vector<std::string> result;
+    int n=array_index.size();
     if (isNumber(value)) { // Jeśli wartość jest liczbą
         int number = std::stoi(value);
         result.push_back("SET " + std::to_string(number) + "\n");
@@ -40,8 +43,8 @@ std::vector<std::string> write(const std::string& value,std::vector<std::string>
 
             }
             else if (symbol.type == "array") {
-                result=write_array( array_index, 0 ,1,symbol.range,symbol.memoryAddress);
-                array_index.clear();
+                result=write_array( array_index, n-1 ,1,symbol.range,symbol.memoryAddress);
+                
             }
             else{
                 throw std::runtime_error("WRITE only supports variables or numbers.");
@@ -51,12 +54,13 @@ std::vector<std::string> write(const std::string& value,std::vector<std::string>
             exit(1);
         }
     }
+    array_index.pop_back();
     return result;
 }
 
 std::vector<std::string> assign(const std::string& identifier,std::vector<std::string>& array_index, SymbolTable& symbolTable){
     std::vector<std::string> result;
-    
+    int n=array_index.size();
     try {
         // Sprawdź, czy zmienna istnieje
         Symbol symbol = symbolTable.findSymbol(identifier);
@@ -68,57 +72,88 @@ std::vector<std::string> assign(const std::string& identifier,std::vector<std::s
         else if(symbol.type=="array"){
             std::vector<std::string> temp;
             result.push_back("LOAD 5\n");
-            temp = assign_array( array_index, 0 ,1,symbol.range,symbol.memoryAddress);
-            result.insert(result.end(), temp.begin(), temp.end());        
-
-            array_index.clear();
+            temp = assign_array( array_index, n-1,1,symbol.range,symbol.memoryAddress);
+            result.insert(result.end(), temp.begin(), temp.end()); 
+                 
         }
     } catch (const std::runtime_error& e) {
         // Jeśli zmienna nie istnieje, zgłoś błąd
         std::cerr << "Error: Variable '" << identifier << "' not declared.\n";
         exit(1); // Możesz zastąpić bardziej eleganckim zarządzaniem błędami
-    }
+    } 
+    array_index.pop_back(); 
     return result;
 }
 
 std::vector<std::string> if_then(const std::vector<std::string>& condition,int n,std::vector<std::string>& array_index,const SymbolTable& symbolTable){
     std::vector<std::string> result;
+
     if(condition[2]=="EQ"){
         result=sub(condition[0],condition[1],array_index,symbolTable);
+        result.pop_back();
         result.push_back("JZERO 2\n");
         result.push_back("JUMP "+std::to_string(n+1)+ "\n");
     } else if(condition[2]=="NEQ"){
         result=sub(condition[0],condition[1],array_index,symbolTable);
+        result.pop_back();
         result.push_back("JZERO "+std::to_string(n+1) + "\n");
     }else if(condition[2]=="GEQ"){
         result=sub(condition[0],condition[1],array_index,symbolTable);
+        result.pop_back();
         result.push_back("JNEG "+std::to_string(n+1) + "\n");
     }
     else if(condition[2]=="GE"){
         result=sub(condition[0],condition[1],array_index,symbolTable);
+        result.pop_back();
         result.push_back("JPOS 2\n");
         result.push_back("JUMP "+std::to_string(n+1)+ "\n");
+    }
+    else if(condition[2]=="LE"){
+        result=sub(condition[0],condition[1],array_index,symbolTable);
+        result.pop_back();
+        result.push_back("JNEG 2\n");
+        result.push_back("JUMP "+std::to_string(n+1)+ "\n");
+    }
+    else if(condition[2]=="LEQ"){
+        result=sub(condition[0],condition[1],array_index,symbolTable);
+        result.pop_back();
+        result.push_back("JPOS "+std::to_string(n+1) + "\n");
     }
     return result;
 }
 
-std::vector<std::string> repeat_until(const std::vector<std::string>& condition,std::vector<std::string>& array_index,int n,const SymbolTable& symbolTable){
+std::vector<std::string> repeat_until(const std::vector<std::string>& condition,int n,std::vector<std::string>& array_index,const SymbolTable& symbolTable){
     std::vector<std::string> result;
     if(condition[2]=="NEQ"){
         result=sub(condition[0],condition[1],array_index,symbolTable);
+        result.pop_back();
         result.push_back("JZERO 2\n");
         result.push_back("JUMP "+std::to_string(n+1)+ "\n");
     } else if(condition[2]=="EQ"){
         result=sub(condition[0],condition[1],array_index,symbolTable);
+        result.pop_back();
         result.push_back("JZERO "+std::to_string(n+1) + "\n");
     }else if(condition[2]=="GEQ"){
         result=sub(condition[1],condition[0],array_index,symbolTable);
+        result.pop_back();
         result.push_back("JNEG "+std::to_string(n+1) + "\n");
     }
     else if(condition[2]=="GE"){
         result=sub(condition[1],condition[0],array_index,symbolTable);
+        result.pop_back();
         result.push_back("JPOS 2\n");
         result.push_back("JUMP "+std::to_string(n+1)+ "\n");
+    }
+    else if(condition[2]=="LE"){
+        result=sub(condition[1],condition[0],array_index,symbolTable);
+        result.pop_back();
+        result.push_back("JNEG 2\n");
+        result.push_back("JUMP "+std::to_string(n+1)+ "\n");
+    }
+    else if(condition[2]=="LEQ"){
+        result=sub(condition[1],condition[0],array_index,symbolTable);
+        result.pop_back();
+        result.push_back("JPOS "+std::to_string(n+1) + "\n");
     }
     return result;
 }
@@ -126,20 +161,36 @@ std::vector<std::string> if_then_else(const std::vector<std::string>& condition,
     std::vector<std::string> result;
     if(condition[2]=="EQ"){
         result=sub(condition[0],condition[1],array_index,symbolTable);
+        result.pop_back();
         result.push_back("JZERO "+std::to_string(second+2)+"\n");
         result.push_back("JUMP "+std::to_string(first+1)+ "\n");
     } else if(condition[2]=="NEQ"){
         result=sub(condition[0],condition[1],array_index,symbolTable);
+        result.pop_back();
         result.push_back("JZERO "+std::to_string(second+2) + "\n");
         result.push_back("JUMP "+std::to_string(first+1)+ "\n");
     }else if(condition[2]=="GEQ"){
         result=sub(condition[0],condition[1],array_index,symbolTable);
+        result.pop_back();
         result.push_back("JNEG "+std::to_string(second+2) + "\n");
         result.push_back("JUMP "+std::to_string(first+1)+ "\n");
     }
     else if(condition[2]=="GE"){
         result=sub(condition[0],condition[1],array_index,symbolTable);
+        result.pop_back();
         result.push_back("JPOS "+std::to_string(second+2)+"\n");
+        result.push_back("JUMP "+std::to_string(first+1)+ "\n");
+    }
+    else if(condition[2]=="LE"){
+        result=sub(condition[0],condition[1],array_index,symbolTable);
+        result.pop_back();
+        result.push_back("JNEG "+std::to_string(second+2)+"\n");
+        result.push_back("JUMP "+std::to_string(first+1)+ "\n");
+    }
+    else if(condition[2]=="LEQ"){
+        result=sub(condition[0],condition[1],array_index,symbolTable);
+        result.pop_back();
+        result.push_back("JPOS "+std::to_string(second+2) + "\n");
         result.push_back("JUMP "+std::to_string(first+1)+ "\n");
     }
     return result;
@@ -149,6 +200,7 @@ std::vector<std::string> for_to(const std::string& identifier,std::vector<std::s
     std::vector<std::string> result;
     Symbol symbol1 = symbolTable.findSymbol(identifier);
     result=add(identifier,"1",array_index,symbolTable);
+    result.pop_back();
     result.push_back("STORE " +std::to_string(symbol1.memoryAddress)  + "\n");
     return result;
 }
@@ -157,6 +209,7 @@ std::vector<std::string> for_downto(const std::string& identifier,std::vector<st
     std::vector<std::string> result;
     Symbol symbol1 = symbolTable.findSymbol(identifier);
     result=sub(identifier,"1",array_index,symbolTable);
+    result.pop_back();
     result.push_back("STORE " +std::to_string(symbol1.memoryAddress)  + "\n");
     
     return result;
@@ -165,7 +218,7 @@ std::vector<std::string> for_downto(const std::string& identifier,std::vector<st
 
 std::vector<std::string> add(const std::string& value1, const std::string& value2, std::vector<std::string>& array_index,const SymbolTable& symbolTable) {
     std::vector<std::string> result;
-
+    int n=array_index.size();
     if (isNumber(value1) && isNumber(value2)) {
         result.push_back("SET " + value1 + "\n");
         result.push_back("STORE 5 \n");
@@ -184,10 +237,13 @@ std::vector<std::string> add(const std::string& value1, const std::string& value
                 result.push_back("STORE 5 \n");
         }   
             else if(symbol2.type=="array"){
+                std::vector<std::string> temp;
                 result.push_back("SET " + std::to_string(number1) + "\n");
-                result.push_back("ADD "+index_array( array_index, 1 ,2,symbol2.range,symbol2.memoryAddress)  + "\n");
+                temp = add_array( array_index, n-1,2,symbol2.range,symbol2.memoryAddress);
+                result.insert(result.end(), temp.begin(), temp.end());    
                 result.push_back("STORE 5 \n");
-                array_index.clear();
+
+               
         }
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in ADD: " << e.what() << "\n";
@@ -204,10 +260,12 @@ std::vector<std::string> add(const std::string& value1, const std::string& value
                 result.push_back("STORE 5 \n");
             }
             else if(symbol1.type=="array"){
+                std::vector<std::string> temp;
                 result.push_back("SET " + std::to_string(number2) + "\n");
-                result.push_back("ADD " +index_array( array_index, 1 ,2,symbol1.range,symbol1.memoryAddress)  + "\n");
+                temp = add_array( array_index, n-2 ,2,symbol1.range,symbol1.memoryAddress);
+                result.insert(result.end(), temp.begin(), temp.end());    
                 result.push_back("STORE 5 \n");
-                array_index.clear();
+      
         }
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in ADD: " << e.what() << "\n";
@@ -222,37 +280,48 @@ std::vector<std::string> add(const std::string& value1, const std::string& value
                 result.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
                 result.push_back("ADD " + std::to_string(symbol2.memoryAddress) + "\n");
                 result.push_back("STORE 5 \n");
-            }
+
+                }
             else if(symbol1.type=="array"&&symbol2.type=="array"){
-                result.push_back("LOAD " + index_array( array_index, 1 ,2,symbol1.range,symbol1.memoryAddress) + "\n");
-                result.push_back("ADD " + index_array( array_index, 2 ,3,symbol2.range,symbol2.memoryAddress) + "\n");
+                std::vector<std::string> temp;
+                result=load_array( array_index, n-2 ,2,symbol1.range,symbol1.memoryAddress);
+                temp = add_array( array_index, n-1 ,3,symbol2.range,symbol2.memoryAddress);
+                result.insert(result.end(), temp.begin(), temp.end());    
                 result.push_back("STORE 5 \n");
-                array_index.clear();
+  
+        
             }
             else if(symbol1.type=="variable"&&symbol2.type=="array"){
+                std::vector<std::string> temp;
                 result.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
-                result.push_back("ADD " + index_array( array_index, 1 ,3,symbol1.range,symbol2.memoryAddress)+ "\n");
+                temp = add_array( array_index, n-1 ,3,symbol2.range,symbol2.memoryAddress);
+                result.insert(result.end(), temp.begin(), temp.end());    
                 result.push_back("STORE 5 \n");
-                array_index.clear();
+            
+                 
             }
             else if(symbol1.type=="array"&&symbol2.type=="variable"){
+                std::vector<std::string> temp;
                 result.push_back("LOAD " + std::to_string(symbol2.memoryAddress) + "\n");
-                result.push_back("ADD " + index_array( array_index, 1 ,2,symbol1.range,symbol1.memoryAddress)+ "\n");
+                temp = add_array( array_index, n-2,2,symbol1.range,symbol1.memoryAddress);
+                result.insert(result.end(), temp.begin(), temp.end());    
                 result.push_back("STORE 5 \n");
-                array_index.clear();
+               
+                
             }
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in ADD: " << e.what() << "\n";
             exit(1);
         }
     }
-
+    array_index.pop_back();
+    array_index.pop_back();
     return result;
 }
 
 std::vector<std::string> sub(const std::string& value1, const std::string& value2,std::vector<std::string>& array_index,const SymbolTable& symbolTable) {
     std::vector<std::string> result;
-
+    int n=array_index.size();
     if (isNumber(value1) && isNumber(value2)) {
         result.push_back("SET " + value2 + "\n");
         result.push_back("STORE 5 \n");
@@ -264,15 +333,17 @@ std::vector<std::string> sub(const std::string& value1, const std::string& value
         try {
             Symbol symbol2 = symbolTable.findSymbol(value2);
             if(symbol2.type=="variable"){
-            result.push_back("SET " + std::to_string(number1) + "\n");
-            result.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
-            result.push_back("STORE 5 \n");
+                result.push_back("SET " + std::to_string(number1) + "\n");
+                result.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
+                result.push_back("STORE 5 \n");
             }else if(symbol2.type=="array"){
-            result.push_back("SET " + std::to_string(number1) + "\n");
-            result.push_back("SUB " + index_array( array_index, 1 ,3,symbol2.range,symbol2.memoryAddress) + "\n");
-            result.push_back("STORE 5 \n");
-            array_index.clear();
+                std::vector<std::string> temp;
+                result.push_back("SET " + std::to_string(number1) + "\n");
+                temp = sub_array( array_index, n-1 ,3,symbol2.range,symbol2.memoryAddress);
+                result.insert(result.end(), temp.begin(), temp.end());    
+                result.push_back("STORE 5 \n");
             }
+           
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in SUB: " << e.what() << "\n";
             exit(1);
@@ -282,14 +353,16 @@ std::vector<std::string> sub(const std::string& value1, const std::string& value
         try {
             Symbol symbol1 = symbolTable.findSymbol(value1);
             if(symbol1.type=="variable"){
-            result.push_back("SET " + std::to_string(-number2) + "\n");
-            result.push_back("ADD " + std::to_string(symbol1.memoryAddress) + "\n");
-            result.push_back("STORE 5 \n");
+                result.push_back("SET " + std::to_string(-number2) + "\n");
+                result.push_back("ADD " + std::to_string(symbol1.memoryAddress) + "\n");
+                result.push_back("STORE 5 \n");
             }else if(symbol1.type=="array"){
-            result.push_back("SET " + std::to_string(-number2) + "\n");
-            result.push_back("ADD " + index_array( array_index, 1 ,3,symbol1.range,symbol1.memoryAddress) + "\n");
-            result.push_back("STORE 5 \n");
-            array_index.clear();
+                std::vector<std::string> temp;   
+                result.push_back("SET " + std::to_string(-number2) + "\n");
+                temp = add_array( array_index, n-2 ,2,symbol1.range,symbol1.memoryAddress);
+                result.insert(result.end(), temp.begin(), temp.end()); 
+                result.push_back("STORE 5 \n");
+                
             }
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in SUB: " << e.what() << "\n";
@@ -299,19 +372,42 @@ std::vector<std::string> sub(const std::string& value1, const std::string& value
         try {
             Symbol symbol1 = symbolTable.findSymbol(value1);
             Symbol symbol2 = symbolTable.findSymbol(value2);
-            
-            result.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
-            result.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
+            if(symbol1.type=="variable"&&symbol2.type=="variable"){
+                result.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
+                result.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
+                result.push_back("STORE 5 \n");
+            }
+            else if(symbol1.type=="array"&&symbol2.type=="array"){
+                std::vector<std::string> temp;
+                result=load_array( array_index, n-2 ,2,symbol1.range,symbol1.memoryAddress);
+                temp = sub_array( array_index, n-1 ,3,symbol2.range,symbol2.memoryAddress);
+                result.insert(result.end(), temp.begin(), temp.end());    
+                result.push_back("STORE 5 \n");
+            }
+            else if(symbol1.type=="variable"&&symbol2.type=="array"){
+                std::vector<std::string> temp;
+                result.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
+                temp = sub_array( array_index, n-1 ,3,symbol2.range,symbol2.memoryAddress);
+                result.insert(result.end(), temp.begin(), temp.end());    
+                result.push_back("STORE 5 \n");
+            }
+            else if(symbol1.type=="array"&&symbol2.type=="variable"){
+                result=load_array( array_index, n-2,2,symbol1.range,symbol1.memoryAddress);
+                result.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");  
+                result.push_back("STORE 5 \n");              
+            }
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in SUB: " << e.what() << "\n";
             exit(1);
         }
     }
-
+    array_index.pop_back();
+    array_index.pop_back();
     return result;
 }
 std::vector<std::string> value_e(const std::string& value1,std::vector<std::string>& array_index,const SymbolTable& symbolTable){
     std::vector<std::string> result;
+    int n = array_index.size();
     if (isNumber(value1)){
         result.push_back("SET " + value1 + "\n");
         result.push_back("STORE 5 \n");
@@ -324,9 +420,8 @@ std::vector<std::string> value_e(const std::string& value1,std::vector<std::stri
             result.push_back("STORE 5 \n");
             }
             else if(symbol1.type=="array"){
-                result.push_back("LOAD " + index_array( array_index, 1 ,2,symbol1.range,symbol1.memoryAddress)+"\n");
+                result=load_array( array_index, n-1 ,2,symbol1.range,symbol1.memoryAddress);
                 result.push_back("STORE 5 \n");
-                array_index.clear();
 
             }
 
@@ -335,6 +430,7 @@ std::vector<std::string> value_e(const std::string& value1,std::vector<std::stri
             exit(1);
         }
     }
+        array_index.pop_back();
         return result;
    
 }
@@ -406,6 +502,34 @@ std::vector<std::string> write_array(const std::vector<std::string>& array, int 
     return result;
 }
 
+std::vector<std::string> add_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress) {
+    std::vector<std::string> result;
+
+    if(isNumber(array[index])&& stoi(array[index])<=range.second && stoi(array[index])>=range.first){
+        int offset=stoi(array[index])-range.first+memory_adress;
+        result.push_back("ADD " + to_string(offset) + "\n");
+    }
+    return result;
+}
+
+std::vector<std::string> load_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress) {
+    std::vector<std::string> result;
+
+    if(isNumber(array[index])&& stoi(array[index])<=range.second && stoi(array[index])>=range.first){
+        int offset=stoi(array[index])-range.first+memory_adress;
+        result.push_back("LOAD " + to_string(offset) + "\n");
+    }
+    return result;
+}
+std::vector<std::string> sub_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress) {
+    std::vector<std::string> result;
+
+    if(isNumber(array[index])&& stoi(array[index])<=range.second && stoi(array[index])>=range.first){
+        int offset=stoi(array[index])-range.first+memory_adress;
+        result.push_back("SUB " + to_string(offset) + "\n");
+    }
+    return result;
+}
 string index_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress) {
     std::vector<std::string> result;
     int offset;
@@ -414,4 +538,5 @@ string index_array(const std::vector<std::string>& array, int index ,int sym_num
     }
     return std::to_string(offset);
 }
+
 

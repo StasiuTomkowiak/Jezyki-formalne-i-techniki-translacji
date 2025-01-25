@@ -19,15 +19,18 @@ extern SymbolTable symbolTable;
 
 
 std::vector<std::string> assign(const std::string& identifier,std::vector<std::string>& array_index, SymbolTable& symbolTable);
-std::vector<std::string> if_then(const std::vector<std::string>& condition,int n,const SymbolTable& symbolTable);
-std::vector<std::string> if_then_else(const std::vector<std::string>& condition,int first,int second,const SymbolTable& symbolTable);
-std::vector<std::string> repeat_until(const std::vector<std::string>& condition,int n,const SymbolTable& symbolTable);
+std::vector<std::string> if_then(const std::vector<std::string>& condition,int n,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
+std::vector<std::string> if_then_else(const std::vector<std::string>& condition,int first,int second,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
+std::vector<std::string> repeat_until(const std::vector<std::string>& condition,int n,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
 std::vector<std::string> for_to(const std::string& identifier,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
-std::vector<std::string> for_downto(const std::string& identifier,const SymbolTable& symbolTable);
+std::vector<std::string> for_downto(const std::string& identifier,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
 std::vector<std::string> read(const std::string& identifier,std::vector<std::string>& array_index, SymbolTable& symbolTable);
 std::vector<std::string> write(const std::string& value,std::vector<std::string>& array_index, const SymbolTable& symbolTable);
 std::vector<std::string> read_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
 std::vector<std::string> write_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
+std::vector<std::string> add_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
+std::vector<std::string> sub_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
+std::vector<std::string> load_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
 string index_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
 
 

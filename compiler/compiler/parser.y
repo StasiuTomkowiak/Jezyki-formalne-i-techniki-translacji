@@ -66,7 +66,8 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                     int first=temp1.size();
                     int second=temp2.size();
                     std::vector<std::string> cond(*$2);
-                    std::vector<std::string> temp3(if_then_else(*$2,first,second,symbolTable));
+                    std::vector<std::string> temp3(if_then_else(*$2,first,second,array_index,symbolTable));
+
                     std::vector<std::string> result;
                     if(cond[2]=="EQ"||cond[2]=="GE"){
                     result.insert(result.end(), temp3.begin(), temp3.end() - 1);
@@ -81,16 +82,17 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                     }
                     $$ = new std::vector<std::string>(result);
              }
-             | IF condition THEN commands ENDIF  {
-                    std::vector<std::string> temp2(*$4);
-                    int n=temp2.size();
-                    std::vector<std::string> temp1(if_then(*$2,n,symbolTable));
-                    $$ = new std::vector<std::string>(*merge(temp1,temp2));
+             | IF condition  THEN commands ENDIF  {
+                std::vector<std::string> temp2(*$4);
+                int n=temp2.size();
+                std::vector<std::string> temp1(if_then(*$2,n,array_index,symbolTable));
+                $$ = new std::vector<std::string>(*merge(temp1,temp2));
+                    
              }
              | WHILE condition DO commands ENDWHILE{
                 std::vector<std::string> temp2(*$4);
                 int n=temp2.size();
-                std::vector<std::string> temp1(if_then(*$2,n,symbolTable));
+                std::vector<std::string> temp1(if_then(*$2,n,array_index,symbolTable));
                 std::vector<std::string> temp3(*merge(temp1,temp2));
                 n=temp3.size();
                 temp3.push_back("JUMP "+to_string(-n)+"\n");
@@ -99,7 +101,7 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
              | REPEAT commands UNTIL condition SEMICOLON {
                 std::vector<std::string> temp2(*$2);
                 int n=temp2.size();
-                std::vector<std::string> temp1(repeat_until(*$4,1,symbolTable));
+                std::vector<std::string> temp1(repeat_until(*$4,1,array_index,symbolTable));
                 std::vector<std::string> temp3(*merge(temp2,temp1));
                 n=temp3.size();
                 temp3.push_back("JUMP "+to_string(-n)+"\n");
@@ -126,7 +128,7 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 temp3->push_back("GEQ");
                 temp1=(*merge(temp1,for_to(*$2,array_index, symbolTable)));
                 int n=temp1.size();
-                temp1=(*merge(temp1,if_then(*temp3,1,symbolTable)));
+                temp1=(*merge(temp1,if_then(*temp3,1,array_index,symbolTable)));
                 n=temp1.size();
                 temp1.push_back("JUMP "+to_string(-n)+"\n");
                 temp1=*merge(*temp2,temp1);
@@ -156,9 +158,9 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 temp3->push_back(*$2);
                 temp3->push_back(*$6);
                 temp3->push_back("GEQ");
-                temp1=(*merge(temp1,for_downto(*$2, symbolTable)));
+                temp1=(*merge(temp1,for_downto(*$2,array_index, symbolTable)));
                 int n=temp1.size();
-                temp1=(*merge(temp1,if_then(*temp3,1,symbolTable)));
+                temp1=(*merge(temp1,if_then(*temp3,1,array_index,symbolTable)));
                 n=temp1.size();
                 temp1.push_back("JUMP "+to_string(-n)+"\n");
                 temp1=*merge(*temp2,temp1);
@@ -167,7 +169,7 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
              }
              | proc_call SEMICOLON
              | READ identifier SEMICOLON       {$$= new std::vector<std::string>(read(*$2,array_index, symbolTable));}             
-             | WRITE value SEMICOLON           { $$ =  new std::vector<std::string>(write(*$2,array_index, symbolTable)); }
+             | WRITE value SEMICOLON           { $$ =  new std::vector<std::string>(write(*$2,array_index, symbolTable));}
 ;
 proc_head    : pidentifier LPRNT args_decl RPRNT
 ;
@@ -217,25 +219,25 @@ args         : args  COMMA pidentifier
 ;
 expression   : value             {$$ =  new std::vector<std::string>(value_e(*($1), array_index,symbolTable));}  
              | value ADD value   {$$ =  new std::vector<std::string>(add(*($1), *($3), array_index,symbolTable));}
-             | value SUB value   {$$ =  new std::vector<std::string>(sub(*($1), *($3), symbolTable));}
+             | value SUB value   {$$ =  new std::vector<std::string>(sub(*($1), *($3), array_index, symbolTable));}
              | value MUL value
              | value DIV value
              | value MOD value
 ;
-condition    : value EQ value     {$$ = new std::vector<std::string>{*($1), *($3), "EQ"};}
-             | value NEQ value    {$$ = new std::vector<std::string>{*($1), *($3), "NEQ"};}
-             | value LE value     {$$ = new std::vector<std::string>{*($3), *($1), "GE"};}
-             | value GE value     {$$ = new std::vector<std::string>{*($1), *($3), "GE"};} 
-             | value LEQ value    {$$ = new std::vector<std::string>{*($3), *($1), "GEQ"};}
-             | value GEQ value    {$$ = new std::vector<std::string>{*($1), *($3), "GEQ"};} 
+condition    : value EQ value     {$$ = new std::vector<std::string>{*($1), *($3), "EQ"} ;}
+             | value NEQ value    {$$ = new std::vector<std::string>{*($1), *($3), "NEQ"} ;}
+             | value LE value     {$$ = new std::vector<std::string>{*($1), *($3), "LE"} ;}
+             | value GE value     {$$ = new std::vector<std::string>{*($1), *($3), "GE"} ;} 
+             | value LEQ value    {$$ = new std::vector<std::string>{*($1), *($3), "LEQ"} ;}
+             | value GEQ value    {$$ = new std::vector<std::string>{*($1), *($3), "GEQ"} ;} 
 ;
-value        : minnum          { $$ = new std::string(std::to_string($1)); }
+value        : minnum          { $$ = new std::string(std::to_string($1)); array_index.push_back("0");}
              | identifier      { $$ = $1; }
 ;
 minnum       : num           { $$ = $1;}
              | SUB num       { $$ = (-1)*$2; } 
 ;
-identifier:    pidentifier { $$ = $1; }
+identifier:    pidentifier { $$ = $1; array_index.push_back("0");}
              | pidentifier LBRCKT pidentifier RBRCKT { array_index.push_back(*$3); $$ = $1;  } 
              | pidentifier LBRCKT minnum RBRCKT { array_index.push_back(std::to_string($3)); $$ = $1;  }
 ;
