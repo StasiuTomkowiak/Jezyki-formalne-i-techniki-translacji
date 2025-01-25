@@ -1,44 +1,42 @@
 PROGRAM IS
-a, b, c, d, e, f, g, tab[1:5]
+a, b, c, d, e, tab[1:5]
 BEGIN
-    # Przypisanie wartości do zmiennych i tablicy
+    # Inicjalizacja wartości zmiennych i tablicy
     a := 10;
     b := 20;
     tab[1] := 30;
     tab[2] := 40;
     tab[3] := 50;
 
-    # 1. Warunek z prostym porównaniem
+    # Przykład 1: Prosty warunek z ELSE
     IF a < b THEN
-        c := b - a; # Odejmowanie
-        WRITE c; # Powinno wypisać 10
+        c := a + b; # Wykona się, bo a < b
+        WRITE c; # Powinno wypisać 30
+    ELSE
+        c := a - b; # Nie wykona się
+        WRITE c;
     ENDIF
 
-    # 2. Warunek z tablicą
-    IF tab[2] > tab[1] THEN
-        d := tab[2] + a; # Dodawanie
-        WRITE d; # Powinno wypisać 50
+    # Przykład 2: Warunek z tablicą
+    IF tab[1] > a THEN
+        d := tab[1] - a; # Wykona się, bo tab[1] > a
+        WRITE d; # Powinno wypisać 20
+    ELSE
+        d := tab[1] + a; # Nie wykona się
+        WRITE d;
     ENDIF
 
-    # 3. Warunek z porównaniem i dodawaniem w kilku krokach
-    IF 31> tab[1] THEN
-        e := a + b; # Dodanie dwóch liczb
-        e := e + tab[3]; # Dodanie wartości z tablicy
-        WRITE e; # Powinno wypisać 80
-    ENDIF
-
-    # 4. Zagnieżdżone IF THEN
-    IF tab[3] > tab[1] THEN
-        IF b > a THEN
-            f := tab[3] - tab[1]; # Odejmowanie
-            WRITE f; # Powinno wypisać 20
+    # Przykład 3: Zagnieżdżony IF THEN ELSE
+    IF b > a THEN
+        IF tab[2] > tab[1] THEN
+            e := tab[2] - tab[1]; # Wykona się, bo b > a i tab[2] > tab[1]
+            WRITE e; # Powinno wypisać 10
+        ELSE
+            e := tab[2] + tab[1];
+            WRITE e;
         ENDIF
-    ENDIF
-
-    # 5. Warunek negatywny z odejmowaniem w krokach
-    IF 30<= tab[2] THEN
-        g := a + b; # Dodanie
-        g := tab[2] - g; # Odejmowanie
-        WRITE g; # Powinno wypisać 10
+    ELSE
+        e := a + b; # Nie wykona się
+        WRITE e;
     ENDIF
 END

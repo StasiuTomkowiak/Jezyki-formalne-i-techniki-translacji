@@ -69,12 +69,12 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                     std::vector<std::string> temp3(if_then_else(*$2,first,second,array_index,symbolTable));
 
                     std::vector<std::string> result;
-                    if(cond[2]=="EQ"||cond[2]=="GE"){
+                    if(cond[2]=="EQ"||cond[2]=="GE"||cond[2]=="LE"){
                     result.insert(result.end(), temp3.begin(), temp3.end() - 1);
                     result.insert(result.end(), temp2.begin(), temp2.end());
                     result.push_back(temp3.back());
                     result.insert(result.end(), temp1.begin(), temp1.end());
-                    }else if (cond[2]=="NEQ"||cond[2]=="GEQ"){
+                    }else if (cond[2]=="NEQ"||cond[2]=="GEQ"||cond[2]=="LEQ"){
                     result.insert(result.end(), temp3.begin(), temp3.end() - 1);
                     result.insert(result.end(), temp1.begin(), temp1.end());
                     result.push_back(temp3.back());
@@ -109,7 +109,6 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
 
              }
              | FOR pidentifier FROM value TO value DO commands ENDFOR{
-                std::vector<std::string> temp1(*$8);
                 
                 // add symbol
                 Symbol newSymbol;
@@ -118,14 +117,14 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addSymbol(*$2, newSymbol);
-
+                
+                std::vector<std::string> temp1(*$8);
+                
                 std::vector<std::string>* temp2=new std::vector<std::string>();
-                temp2->push_back("SET " + *$4+"\n");
-                temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
                 std::vector<std::string>* temp3 = new std::vector<std::string>();
-                temp3->push_back(*$6);
                 temp3->push_back(*$2);
-                temp3->push_back("GEQ");
+                temp3->push_back(*$6);
+                temp3->push_back("LEQ");
                 temp1=(*merge(temp1,for_to(*$2,array_index, symbolTable)));
                 int n=temp1.size();
                 temp1=(*merge(temp1,if_then(*temp3,1,array_index,symbolTable)));
