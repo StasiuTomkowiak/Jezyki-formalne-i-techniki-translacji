@@ -26,13 +26,12 @@ std::vector<std::string> for_to(const std::string& identifier,std::vector<std::s
 std::vector<std::string> for_downto(const std::string& identifier,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
 std::vector<std::string> read(const std::string& identifier,std::vector<std::string>& array_index, SymbolTable& symbolTable);
 std::vector<std::string> write(const std::string& value,std::vector<std::string>& array_index, const SymbolTable& symbolTable);
-std::vector<std::string> read_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
-std::vector<std::string> write_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
-std::vector<std::string> add_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
-std::vector<std::string> sub_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
-std::vector<std::string> load_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
-string index_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
 
+std::vector<std::string> read_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress,const SymbolTable& symbolTable);
+std::vector<std::string> write_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress,const SymbolTable& symbolTable);
+std::vector<std::string> add_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress,const SymbolTable& symbolTable);
+std::vector<std::string> sub_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress,const SymbolTable& symbolTable);
+std::vector<std::string> load_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress,const SymbolTable& symbolTable);
 
 std::vector<std::string> value_e(const std::string& value1,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
 std::vector<std::string> add(const std::string& value1, const std::string& value2,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
@@ -44,4 +43,4 @@ std::vector<std::string>* merge(const std::vector<std::string>& vec1, const std:
 
 bool isNumber(const std::string& s);
 void printCommands(std::vector<std::string> result);
-std::vector<std::string> assign_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress);
+std::vector<std::string> assign_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress,const SymbolTable& symbolTable);

@@ -30,6 +30,7 @@ struct SymbolTable {
     Symbol findSymbol(const std::string& name) const;
     int getArrayElementAddress(const std::string& arrayName, int index) const ;
     void removeCurrentScope();
+    bool symbolExist(const std::string& name) const;
     void enterScope();
     void exitScope();
     int calculateRangeLength(const Symbol& symbol); 

@@ -1,42 +1,33 @@
 PROGRAM IS
-a, b, c, d, e, tab[1:5]
+x, sum, tab[1:5],p
 BEGIN
-    # Inicjalizacja wartości zmiennych i tablicy
-    a := 10;
-    b := 20;
-    tab[1] := 30;
-    tab[2] := 40;
-    tab[3] := 50;
+    # Inicjalizacja wartości tablicy
+    p:=2;
+    READ tab[p];
+    tab[3] := 30;
+    tab[4] := 40;
+    tab[5] := 50;
 
-    # Przykład 1: Prosty warunek z ELSE
-    IF a < b THEN
-        c := a + b; # Wykona się, bo a < b
-        WRITE c; # Powinno wypisać 30
-    ELSE
-        c := a - b; # Nie wykona się
-        WRITE c;
-    ENDIF
+    # Inicjalizacja zmiennych
+    x := 1; # Indeks tablicy
+    sum := 0; # Suma wartości
+    tab[x] := 5;
+    # Pętla WHILE: Sumowanie wartości tablicy
+    WHILE x <= tab[x] DO
+        sum := sum + tab[x];
+        
+        x := x + 1; # Przejście do następnego indeksu
+    ENDWHILE
 
-    # Przykład 2: Warunek z tablicą
-    IF tab[1] > a THEN
-        d := tab[1] - a; # Wykona się, bo tab[1] > a
-        WRITE d; # Powinno wypisać 20
-    ELSE
-        d := tab[1] + a; # Nie wykona się
-        WRITE d;
-    ENDIF
+    # Wypisanie sumy wartości w tablicy
+    WRITE sum; # Powinno wypisać 150
 
-    # Przykład 3: Zagnieżdżony IF THEN ELSE
-    IF b > a THEN
-        IF tab[2] > tab[1] THEN
-            e := tab[2] - tab[1]; # Wykona się, bo b > a i tab[2] > tab[1]
-            WRITE e; # Powinno wypisać 10
-        ELSE
-            e := tab[2] + tab[1];
-            WRITE e;
-        ENDIF
-    ELSE
-        e := a + b; # Nie wykona się
-        WRITE e;
-    ENDIF
+    # Resetowanie zmiennej x
+    x := 5;
+
+    # Pętla WHILE: Wypisywanie tablicy od końca
+    WHILE x >= 1 DO
+        WRITE tab[x]; # Wypisanie wartości tablicy
+        x := x - 1; # Przejście do poprzedniego indeksu
+    ENDWHILE
 END

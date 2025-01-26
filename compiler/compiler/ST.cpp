@@ -47,6 +47,13 @@ Symbol SymbolTable::findSymbol(const std::string& name) const {
     }
     return it->second;
 }
+bool SymbolTable::symbolExist(const std::string& name) const {
+    auto it = table.find(name);
+    if (it == table.end() || it->second.scopeLevel > currentScope) {
+        return false;
+    }
+    return true;
+}
 int SymbolTable::getArrayElementAddress(const std::string& arrayName, int index) const {
     Symbol symbol = findSymbol(arrayName);
 

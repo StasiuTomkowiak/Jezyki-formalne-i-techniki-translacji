@@ -92,7 +92,7 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
              | WHILE condition DO commands ENDWHILE{
                 std::vector<std::string> temp2(*$4);
                 int n=temp2.size();
-                std::vector<std::string> temp1(if_then(*$2,n,array_index,symbolTable));
+                std::vector<std::string> temp1(if_then(*$2,n+1,array_index,symbolTable));
                 std::vector<std::string> temp3(*merge(temp1,temp2));
                 n=temp3.size();
                 temp3.push_back("JUMP "+to_string(-n)+"\n");
