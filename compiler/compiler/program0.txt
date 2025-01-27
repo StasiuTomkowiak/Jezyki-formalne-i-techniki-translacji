@@ -1,44 +1,48 @@
 PROGRAM IS
-a, b, c, d, e, f, g, tab[1:5]
+a, b, c, d, e, f, g, h, tab[1:5]
 BEGIN
     # Przypisanie wartości do zmiennych i tablicy
-    a := 1;
-    b := 2;
-    tab[1] := -10;
-    tab[2] := 20;
-    tab[3] := -30;
-    tab[4] := 40;
-    tab[5] := -50;
+    a := -2;
+    b := 0;
+    tab[1] := 10;
+    tab[2] := -53498223;
+    tab[3] := 20;
+    tab[4] := 0;
+    tab[5] := -1;
 
-    # 1. Mnożenie elementu tablicy przez zmienną
-    IF a = 1 THEN
-        c := tab[5]*tab[a] ; # Pobranie wartości z tab[1] i pomnożenie przez 2
-        WRITE c; # Powinno wypisać 500
+    # 1. Mnożenie przez 0
+    IF b = 0 THEN
+        c := tab[1] * b; # Mnożenie przez 0
+        WRITE c; # Powinno wypisać 0
     ENDIF
 
-    # 2. Mnożenie dwóch elementów tablicy, indeksowanych zmiennymi
-    IF b = 2 THEN
-        d := tab[a] * tab[b]; # Mnożenie tab[1] i tab[2]
-        WRITE d; # Powinno wypisać -200
+    # 2. Mnożenie dwóch wartości ujemnych
+    IF tab[2] < 0 THEN
+        d := tab[2] * tab[5]; # Mnożenie dwóch ujemnych wartości
+        WRITE d; # Powinno wypisać 15
     ENDIF
 
-    # 3. Mnożenie elementu tablicy przez wartość w zmiennej
-    IF a < b THEN
-        e := tab[b] * a; # Mnożenie tab[2] przez wartość w zmiennej a
-        WRITE e; # Powinno wypisać 20
+    # 3. Mnożenie wartości dodatniej przez ujemną
+    IF tab[3] > 0 THEN
+        e := tab[3] * tab[2]; # Mnożenie dodatniej przez ujemną
+        WRITE e; # Powinno wypisać -100
     ENDIF
 
-    # 4. Mnożenie i przypisanie do elementu tablicy
-    IF tab[b] > 10 THEN
-        tab[b] := tab[b] * 3; # Mnożenie wartości tab[2] przez 3
-        WRITE tab[b]; # Powinno wypisać 60
+    # 4. Mnożenie wartości ujemnej przez 0
+    IF tab[5] < 0 THEN
+        f := tab[5] * tab[4]; # Mnożenie ujemnej wartości przez 0
+        WRITE f; # Powinno wypisać 0
     ENDIF
 
-    # 5. Zagnieżdżony IF THEN dla mnożenia
-    IF tab[a] < tab[b] THEN
-        IF b = 2 THEN
-            f := tab[a] * tab[b]; # Mnożenie tab[1] i tab[2]
-            WRITE f; # Powinno wypisać -600 (po modyfikacji tab[2])
-        ENDIF
+    # 5. Mnożenie zmiennej przez ujemny element tablicy
+    IF a < 0 THEN
+        g := a * tab[2]; # Mnożenie zmiennej przez tab[2]
+        WRITE g; # Powinno wypisać 10
+    ENDIF
+
+    # 6. Mnożenie elementu tablicy przez 0
+    IF tab[4] = 0 THEN
+        h := tab[4] * tab[3]; # Mnożenie tab[4] przez tab[3]
+        WRITE h; # Powinno wypisać 0
     ENDIF
 END

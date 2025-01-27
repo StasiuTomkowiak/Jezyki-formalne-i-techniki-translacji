@@ -164,12 +164,13 @@ std::vector<std::string> if_then_else(const std::vector<std::string>& condition,
     } else if(condition[2]=="NEQ"){
         result=sub(condition[0],condition[1],array_index,symbolTable);
      
-        result.push_back("JZERO "+std::to_string(second+2) + "\n");
-        result.push_back("JUMP "+std::to_string(first+1)+ "\n");
+        result.push_back("JZERO "+std::to_string(first+2) + "\n");
+        result.push_back("JUMP "+std::to_string(second+1)+ "\n");
     }else if(condition[2]=="GEQ"){
-    
-        result.push_back("JNEG "+std::to_string(second+2) + "\n");
-        result.push_back("JUMP "+std::to_string(first+1)+ "\n");
+        result=sub(condition[0],condition[1],array_index,symbolTable);
+        
+        result.push_back("JNEG "+std::to_string(first+2) + "\n");
+        result.push_back("JUMP "+std::to_string(second+1)+ "\n");
     }
     else if(condition[2]=="GE"){
         result=sub(condition[0],condition[1],array_index,symbolTable);
@@ -178,6 +179,7 @@ std::vector<std::string> if_then_else(const std::vector<std::string>& condition,
         result.push_back("JUMP "+std::to_string(first+1)+ "\n");
     }
     else if(condition[2]=="LE"){
+        result=sub(condition[0],condition[1],array_index,symbolTable);
        
         result.push_back("JNEG "+std::to_string(second+2)+"\n");
         result.push_back("JUMP "+std::to_string(first+1)+ "\n");
@@ -185,8 +187,8 @@ std::vector<std::string> if_then_else(const std::vector<std::string>& condition,
     else if(condition[2]=="LEQ"){
         result=sub(condition[0],condition[1],array_index,symbolTable);
       
-        result.push_back("JPOS "+std::to_string(second+2) + "\n");
-        result.push_back("JUMP "+std::to_string(first+1)+ "\n");
+        result.push_back("JPOS "+std::to_string(first+2) + "\n");
+        result.push_back("JUMP "+std::to_string(second+1)+ "\n");
     }
     return result;
 }
@@ -651,7 +653,6 @@ std::vector<std::string> mul(const std::string& value1, const std::string& value
                 result.push_back("JUMP 2\n");
                 result.push_back("STORE 1\n");
 
-                
                 result.push_back("LOAD " + std::to_string(symbol2.memoryAddress) + "\n");
                 result.push_back("JPOS 6\n");
                 result.push_back("SET 1\n");
