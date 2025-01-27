@@ -1,33 +1,35 @@
+# Fibonacci 26
+# ? 1
+# > 121393
+
 PROGRAM IS
-x, sum, tab[1:5],p
+  a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
 BEGIN
-    # Inicjalizacja wartości tablicy
-    p:=2;
-    READ tab[p];
-    tab[3] := 30;
-    tab[4] := 40;
-    tab[5] := 50;
-
-    # Inicjalizacja zmiennych
-    x := 1; # Indeks tablicy
-    sum := 0; # Suma wartości
-    tab[x] := 5;
-    # Pętla WHILE: Sumowanie wartości tablicy
-    WHILE x <= tab[x] DO
-        sum := sum + tab[x];
-        
-        x := x + 1; # Przejście do następnego indeksu
-    ENDWHILE
-
-    # Wypisanie sumy wartości w tablicy
-    WRITE sum; # Powinno wypisać 150
-
-    # Resetowanie zmiennej x
-    x := 5;
-
-    # Pętla WHILE: Wypisywanie tablicy od końca
-    WHILE x >= 1 DO
-        WRITE tab[x]; # Wypisanie wartości tablicy
-        x := x - 1; # Przejście do poprzedniego indeksu
-    ENDWHILE
+  READ a;
+  b := a;
+  c := b + a;
+  d := c + b;
+  e := d + c;
+  f := e + d;
+  g := f + e;
+  h := g + f;
+  i := h + g;
+  j := i + h;
+  k := j + i;
+  l := k + j;
+  m := l + k;
+  n := m + l;
+  o := n + m;
+  p := o + n;
+  q := p + o;
+  r := q + p;
+  s := r + q;
+  t := s + r;
+  u := t + s;
+  v := u + t;
+  w := v + u;
+  x := w + v;
+  y := x + w;
+  z := y + x;
+  WRITE z;
 END

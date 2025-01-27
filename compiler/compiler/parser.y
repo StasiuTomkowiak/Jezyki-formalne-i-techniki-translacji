@@ -219,7 +219,7 @@ args         : args  COMMA pidentifier
 expression   : value             {$$ =  new std::vector<std::string>(value_e(*($1), array_index,symbolTable));}  
              | value ADD value   {$$ =  new std::vector<std::string>(add(*($1), *($3), array_index,symbolTable));}
              | value SUB value   {$$ =  new std::vector<std::string>(sub(*($1), *($3), array_index, symbolTable));}
-             | value MUL value
+             | value MUL value   {$$ =  new std::vector<std::string>(mul(*($1), *($3), array_index, symbolTable));}
              | value DIV value
              | value MOD value
 ;

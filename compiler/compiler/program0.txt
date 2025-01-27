@@ -1,10 +1,44 @@
 PROGRAM IS
-	 n,p 
+a, b, c, d, e, f, g, tab[1:5]
 BEGIN
-	READ n;
+    # Przypisanie wartości do zmiennych i tablicy
+    a := 1;
+    b := 2;
+    tab[1] := 10;
+    tab[2] := 20;
+    tab[3] := 30;
+    tab[4] := 40;
+    tab[5] := 50;
 
-	REPEAT 
-	WRITE 0;
-	n:=n-1;
-	UNTIL n=0;
+    # 1. Mnożenie elementu tablicy przez zmienną
+    IF a = 1 THEN
+        c := 2*tab[a] ; # Pobranie wartości z tab[1] i pomnożenie przez 2
+        WRITE c; # Powinno wypisać 20
+    ENDIF
+
+    # 2. Mnożenie dwóch elementów tablicy, indeksowanych zmiennymi
+    IF b = 2 THEN
+        d := tab[a] * tab[b]; # Mnożenie tab[1] i tab[2]
+        WRITE d; # Powinno wypisać 200
+    ENDIF
+
+    # 3. Mnożenie elementu tablicy przez wartość w zmiennej
+    IF a < b THEN
+        e := tab[b] * a; # Mnożenie tab[2] przez wartość w zmiennej a
+        WRITE e; # Powinno wypisać 20
+    ENDIF
+
+    # 4. Mnożenie i przypisanie do elementu tablicy
+    IF tab[b] > 10 THEN
+        tab[b] := tab[b] * 3; # Mnożenie wartości tab[2] przez 3
+        WRITE tab[b]; # Powinno wypisać 60
+    ENDIF
+
+    # 5. Zagnieżdżony IF THEN dla mnożenia
+    IF tab[a] < tab[b] THEN
+        IF b = 2 THEN
+            f := tab[a] * tab[b]; # Mnożenie tab[1] i tab[2]
+            WRITE f; # Powinno wypisać 600 (po modyfikacji tab[2])
+        ENDIF
+    ENDIF
 END
