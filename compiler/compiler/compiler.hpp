@@ -46,4 +46,4 @@ std::vector<std::string>* merge(const std::vector<std::string>& vec1, const std:
 
 bool isNumber(const std::string& s);
 void printCommands(std::vector<std::string> result);
-std::vector<std::string> mul_pom();
+std::vector<std::string> mul_pos();

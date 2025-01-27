@@ -381,13 +381,32 @@ std::vector<std::string> mul(const std::string& value1, const std::string& value
         std::vector<std::string> temp;   
                         
         result.push_back("SET " + value1 + "\n");
+        result.push_back("JPOS 4\n");
+        result.push_back("SET 1\n");
+        result.push_back("STORE 4\n");
+        std::string modified = std::string(value1.c_str() + 1);
+        if(modified==""){
+            modified="0";
+        }
+        result.push_back("SET " + modified + "\n");
         result.push_back("STORE 1\n");
+
         result.push_back("SET " + value2 + "\n");
+        result.push_back("JPOS 5\n");
+        result.push_back("SET 1\n");
+        result.push_back("SUB 4\n");
+        result.push_back("STORE 4\n");
+
+        modified = std::string(value2.c_str()+1);
+        if(modified==""){
+            modified="0";
+        }
+        result.push_back("SET " + modified + "\n");
         result.push_back("STORE 2\n");
         result.push_back("SET 0\n");
         result.push_back("STORE 5\n");
 
-        temp = mul_pom();
+        temp = mul_pos();
         result.insert(result.end(), temp.begin(), temp.end());  
 
     } else if (isNumber(value1)) {
@@ -398,32 +417,65 @@ std::vector<std::string> mul(const std::string& value1, const std::string& value
             if(symbol2.type=="variable"){
                 std::vector<std::string> temp;   
                 result.push_back("SET " + value1 + "\n");
+                result.push_back("JPOS 4\n");
+                result.push_back("SET 1\n");
+                result.push_back("STORE 4\n");
+                std::string modified = std::string(value1.c_str() + 1);
+                if(modified==""){
+                        modified="0";
+                }
+                result.push_back("SET " + modified + "\n");
                 result.push_back("STORE 1\n");
                 result.push_back("SET 0\n");
                 result.push_back("STORE 5\n");
                 result.push_back("LOAD " + std::to_string(symbol2.memoryAddress) + "\n");
+                result.push_back("JPOS 6\n");
+                result.push_back("SET 1\n");
+                result.push_back("SUB 4\n");
+                result.push_back("STORE 4\n");
+                result.push_back("SET 0\n");
+                result.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
                 result.push_back("STORE 2\n");
                 
-                temp = mul_pom();
+                temp = mul_pos();
                 result.insert(result.end(), temp.begin(), temp.end());  
                
         }   
             else if(symbol2.type=="array"){       
                 std::vector<std::string> temp;   
+                
                 result.push_back("SET " + value1 + "\n");
+                result.push_back("JPOS 4\n");
+                result.push_back("SET 1\n");
+                result.push_back("STORE 4\n");
+                std::string modified = std::string(value1.c_str() + 1);
+                if(modified==""){
+                        modified="0";
+                }
+                result.push_back("SET " + modified + "\n");
                 result.push_back("STORE 1\n");
-                result.push_back("SET 0\n");
-                result.push_back("STORE 5\n");
+                
                 temp=load_array( array_index, n-1 ,2,symbol2.range,symbol2.memoryAddress,symbolTable);
                 result.insert(result.end(), temp.begin(), temp.end());  
+                result.push_back("JPOS 9\n");
+                result.push_back("STORE 5\n");
+                result.push_back("SET 0\n");
+                result.push_back("SUB 5\n");
                 result.push_back("STORE 2\n");
-                
-                temp = mul_pom();
+                result.push_back("SET 1\n");
+                result.push_back("SUB 4\n");
+                result.push_back("STORE 4\n");
+                result.push_back("JUMP 2\n");                
+                result.push_back("STORE 2\n");
+
+                result.push_back("SET 0\n");
+                result.push_back("STORE 5\n");
+                temp = mul_pos();
                 result.insert(result.end(), temp.begin(), temp.end());  
                                
         }
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in ADD: " << e.what() << "\n";
+            std::cerr << "Error in MUL: " << e.what() << "\n";
             exit(1);
         }
     } else if (isNumber(value2)) {
@@ -434,31 +486,65 @@ std::vector<std::string> mul(const std::string& value1, const std::string& value
             if(symbol1.type=="variable"){
                 std::vector<std::string> temp;   
                 result.push_back("SET " + value2 + "\n");
+                result.push_back("JPOS 4\n");
+                result.push_back("SET 1\n");
+                result.push_back("STORE 4\n");
+                std::string modified = std::string(value2.c_str() + 1);
+                if(modified==""){
+                        modified="0";
+                }
+                result.push_back("SET " + modified + "\n");
                 result.push_back("STORE 2\n");
+
                 result.push_back("SET 0\n");
                 result.push_back("STORE 5\n");
+
                 result.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
+                result.push_back("JPOS 6\n");
+                result.push_back("SET 1\n");
+                result.push_back("SUB 4\n");
+                result.push_back("STORE 4\n");
+                result.push_back("SET 0\n");
+                result.push_back("SUB " + std::to_string(symbol1.memoryAddress) + "\n");
                 result.push_back("STORE 1\n");
-                
-                temp = mul_pom();
+
+                temp = mul_pos();
                 result.insert(result.end(), temp.begin(), temp.end());  
             }
             else if(symbol1.type=="array"){
                 std::vector<std::string> temp;   
                 result.push_back("SET " + value2 + "\n");
+                result.push_back("JPOS 4\n");
+                result.push_back("SET 1\n");
+                result.push_back("STORE 4\n");
+                std::string modified = std::string(value2.c_str() + 1);
+                if(modified==""){
+                        modified="0";
+                }
+                result.push_back("SET " + modified + "\n");
                 result.push_back("STORE 2\n");
+
+                temp=load_array( array_index, n-2 ,1,symbol1.range,symbol1.memoryAddress,symbolTable);
+                result.insert(result.end(), temp.begin(), temp.end());  
+                result.push_back("JPOS 9\n");
+                result.push_back("STORE 5\n");
+                result.push_back("SET 0\n");
+                result.push_back("SUB 5\n");
+                result.push_back("STORE 1\n");
+                result.push_back("SET 1\n");
+                result.push_back("SUB 4\n");
+                result.push_back("STORE 4\n");
+                result.push_back("JUMP 2\n");                
+                result.push_back("STORE 1\n");
+
                 result.push_back("SET 0\n");
                 result.push_back("STORE 5\n");
-                temp=load_array( array_index, n-2 ,1,symbol1.range,symbol1.memoryAddress,symbolTable);
-                result.insert(result.end(), temp.begin(), temp.end()); 
-                result.push_back("STORE 1\n");
-                
-                temp = mul_pom();
+                temp = mul_pos();
                 result.insert(result.end(), temp.begin(), temp.end());  
       
         }
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in ADD: " << e.what() << "\n";
+            std::cerr << "Error in MUL: " << e.what() << "\n";
             exit(1);
         }
     } else {
@@ -469,53 +555,120 @@ std::vector<std::string> mul(const std::string& value1, const std::string& value
             if(symbol1.type=="variable"&&symbol2.type=="variable"){
                 std::vector<std::string> temp;   
                 result.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
+                result.push_back("JPOS 5\n");
+                result.push_back("SET 1\n");
+                result.push_back("STORE 4\n");
+                result.push_back("SET 0\n");
+                result.push_back("SUB " + std::to_string(symbol1.memoryAddress) + "\n");
                 result.push_back("STORE 1\n");
+
                 result.push_back("SET 0\n");
                 result.push_back("STORE 5\n");
+
                 result.push_back("LOAD " + std::to_string(symbol2.memoryAddress) + "\n");
+                result.push_back("JPOS 6\n");
+                result.push_back("SET 1\n");
+                result.push_back("SUB 4\n");
+                result.push_back("STORE 4\n");
+                result.push_back("SET 0\n");
+                result.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
                 result.push_back("STORE 2\n");
         
-                temp = mul_pom();
+                temp = mul_pos();
                 result.insert(result.end(), temp.begin(), temp.end());  
                 }
             else if(symbol1.type=="array"&&symbol2.type=="array"){
                 std::vector<std::string> temp;   
                 result=load_array( array_index, n-2 ,1,symbol1.range,symbol1.memoryAddress,symbolTable);
+                result.push_back("JPOS 8\n");
+                result.push_back("STORE 5\n");
+                result.push_back("SET 0\n");
+                result.push_back("SUB 5\n");
                 result.push_back("STORE 1\n");
+                result.push_back("SET 1\n");
+                result.push_back("STORE 4\n");
+                result.push_back("JUMP 2\n");
+                result.push_back("STORE 1\n");
+
+                temp=load_array( array_index, n-1 ,2,symbol2.range,symbol2.memoryAddress,symbolTable);
+                result.insert(result.end(), temp.begin(), temp.end()); 
+                result.push_back("JPOS 9\n");
+                result.push_back("STORE 5\n");
+                result.push_back("SET 0\n");
+                result.push_back("SUB 5\n");
+                result.push_back("STORE 2\n");
+                result.push_back("SET 1\n");
+                result.push_back("SUB 4\n");
+                result.push_back("STORE 4\n");
+                result.push_back("JUMP 2\n");                
+                result.push_back("STORE 2\n");
+
                 result.push_back("SET 0\n");
                 result.push_back("STORE 5\n");
-                temp=load_array( array_index, n-1 ,2,symbol2.range,symbol2.memoryAddress,symbolTable);
-                result.insert(result.end(), temp.begin(), temp.end());  
-                result.push_back("STORE 2\n");
-                temp = mul_pom();
+                temp = mul_pos();
                 result.insert(result.end(), temp.begin(), temp.end());  
             }
             else if(symbol1.type=="variable"&&symbol2.type=="array"){
                 std::vector<std::string> temp;   
                 result.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
+                result.push_back("JPOS 5\n");
+                result.push_back("SET 1\n");
+                result.push_back("STORE 4\n");
+                result.push_back("SET 0\n");
+                result.push_back("SUB " + std::to_string(symbol1.memoryAddress) + "\n");
                 result.push_back("STORE 1\n");
+
+                
+                temp=load_array( array_index, n-1 ,2,symbol2.range,symbol2.memoryAddress,symbolTable);
+                result.insert(result.end(), temp.begin(), temp.end()); 
+                result.push_back("JPOS 9\n");
+                result.push_back("STORE 5\n");
+                result.push_back("SET 0\n");
+                result.push_back("SUB 5\n");
+                result.push_back("STORE 2\n");
+                result.push_back("SET 1\n");
+                result.push_back("SUB 4\n");
+                result.push_back("STORE 4\n");
+                result.push_back("JUMP 2\n");                
+                result.push_back("STORE 2\n");
+
                 result.push_back("SET 0\n");
                 result.push_back("STORE 5\n");
-                temp=load_array( array_index, n-1 ,2,symbol2.range,symbol2.memoryAddress,symbolTable);
-                result.insert(result.end(), temp.begin(), temp.end());  
-                result.push_back("STORE 2\n");
-                temp = mul_pom();
+                temp = mul_pos();
                 result.insert(result.end(), temp.begin(), temp.end());  
                 
             }
             else if(symbol1.type=="array"&&symbol2.type=="variable"){
                 std::vector<std::string> temp;   
                 result=load_array( array_index, n-2 ,1,symbol1.range,symbol1.memoryAddress,symbolTable);
+                result.push_back("JPOS 8\n");
+                result.push_back("STORE 5\n");
+                result.push_back("SET 0\n");
+                result.push_back("SUB 5\n");
                 result.push_back("STORE 1\n");
+                result.push_back("SET 1\n");
+                result.push_back("STORE 4\n");
+                result.push_back("JUMP 2\n");
+                result.push_back("STORE 1\n");
+
+                
+                result.push_back("LOAD " + std::to_string(symbol2.memoryAddress) + "\n");
+                result.push_back("JPOS 6\n");
+                result.push_back("SET 1\n");
+                result.push_back("SUB 4\n");
+                result.push_back("STORE 4\n");
+                result.push_back("SET 0\n");
+                result.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
+                result.push_back("STORE 2\n");
+        
+
                 result.push_back("SET 0\n");
                 result.push_back("STORE 5\n");
-                result.push_back("LOAD " + std::to_string(symbol2.memoryAddress) + "\n");
-                result.push_back("STORE 2\n");
-                temp = mul_pom();
+                temp = mul_pos();
                 result.insert(result.end(), temp.begin(), temp.end());
             }
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in ADD: " << e.what() << "\n";
+            std::cerr << "Error in MUL: " << e.what() << "\n";
             exit(1);
         }
     }
@@ -711,7 +864,7 @@ std::vector<std::string> sub_array(const std::vector<std::string>& array, int in
     }
     return result;
 }
-std::vector<std::string> mul_pom() {
+std::vector<std::string> mul_pos() {
     std::vector<std::string> result;
 
     result.push_back("LOAD 2\n");
@@ -732,7 +885,19 @@ std::vector<std::string> mul_pom() {
     result.push_back("HALF\n");
     result.push_back("STORE 2\n");
     result.push_back("JUMP -17\n");
-    result.push_back("LOAD 5 \n");
+    result.push_back("LOAD 4\n");
+    result.push_back("JZERO 6\n");
+    result.push_back("SET 0\n");
+    result.push_back("STORE 4\n");
+    result.push_back("SET 0\n");
+    result.push_back("SUB 5\n");
+    result.push_back("STORE 5\n");
+    result.push_back("LOAD 5\n");
+
+
+
+    
+
 
     return result;
 }

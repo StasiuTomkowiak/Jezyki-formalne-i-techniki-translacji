@@ -4,22 +4,22 @@ BEGIN
     # Przypisanie wartości do zmiennych i tablicy
     a := 1;
     b := 2;
-    tab[1] := 10;
+    tab[1] := -10;
     tab[2] := 20;
-    tab[3] := 30;
+    tab[3] := -30;
     tab[4] := 40;
-    tab[5] := 50;
+    tab[5] := -50;
 
     # 1. Mnożenie elementu tablicy przez zmienną
     IF a = 1 THEN
-        c := 2*tab[a] ; # Pobranie wartości z tab[1] i pomnożenie przez 2
-        WRITE c; # Powinno wypisać 20
+        c := tab[5]*tab[a] ; # Pobranie wartości z tab[1] i pomnożenie przez 2
+        WRITE c; # Powinno wypisać 500
     ENDIF
 
     # 2. Mnożenie dwóch elementów tablicy, indeksowanych zmiennymi
     IF b = 2 THEN
         d := tab[a] * tab[b]; # Mnożenie tab[1] i tab[2]
-        WRITE d; # Powinno wypisać 200
+        WRITE d; # Powinno wypisać -200
     ENDIF
 
     # 3. Mnożenie elementu tablicy przez wartość w zmiennej
@@ -38,7 +38,7 @@ BEGIN
     IF tab[a] < tab[b] THEN
         IF b = 2 THEN
             f := tab[a] * tab[b]; # Mnożenie tab[1] i tab[2]
-            WRITE f; # Powinno wypisać 600 (po modyfikacji tab[2])
+            WRITE f; # Powinno wypisać -600 (po modyfikacji tab[2])
         ENDIF
     ENDIF
 END
