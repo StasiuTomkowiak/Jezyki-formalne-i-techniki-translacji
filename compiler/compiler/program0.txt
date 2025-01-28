@@ -15,16 +15,16 @@ BEGIN
     f[1] := 1;
     s[1] := 1;
     i[1] := 1;
-    FOR j FROM 2 TO tab[p] DO
+    FOR j FROM tab[p] DOWNTO n DO
         k := j - 1;
         l := k - 1;
 	    i[j] := i[k] + 1;
 	    f[j] := f[k] + f[l];
         s[j] := s[k] * i[j];
-        p:=j*2;
-        WRITE p;
+        WRITE j;
 
     ENDFOR
+
     WRITE s[20];
     WRITE f[20];
 END

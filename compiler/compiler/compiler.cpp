@@ -732,14 +732,21 @@ bool isNumber(const std::string& s) {
         return true;
     }
 }
-void printCommands(std::vector<std::string> result)
-{
-    cout << "Komendy: \n";
-    for (int i = 0; i < result.size(); i++)
-    {
-        cout << result.at(i);
+void printCommands(const std::vector<std::string>& result, const std::string& outputFile) {
+    std::ofstream outFile(outputFile);
+    if (!outFile) {
+        std::cerr << "Cannot open output file: " << outputFile << std::endl;
+        return;
     }
-    cout << endl;
+
+    std::cout << "Saving commands to " << outputFile << std::endl;
+
+    for (const auto& command : result) {
+        outFile << command;  // Zapisanie każdej komendy do pliku
+    }
+
+    outFile.close();
+    std::cout << "Commands saved successfully." << std::endl;
 }
 
 std::vector<std::string> assign_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress,const SymbolTable& symbolTable) {

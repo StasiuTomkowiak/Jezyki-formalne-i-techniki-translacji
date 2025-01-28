@@ -102,3 +102,15 @@ void SymbolTable::debugPrint() const {
                   << "\n";
     }
 }
+
+void SymbolTable::removeSymbol(const std::string& name) {
+    auto it = table.find(name);
+    if (it != table.end()) {
+        // Jeśli symbol istnieje, usuń go z tablicy symboli
+        table.erase(it);
+    } else {
+        // Jeśli symbol nie istnieje, zgłoś błąd
+        throw std::runtime_error("Symbol not found: " + name);
+    }
+}
+

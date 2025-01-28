@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 #include "parser.h"
 #include "compiler.hpp"
 #include "ST.hpp"
@@ -201,6 +202,11 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 n=temp1.size();
                 temp1.push_back("JUMP "+to_string(-n)+"\n");
                 temp1=*merge(*temp2,temp1);
+
+                symbolTable.removeSymbol(*$2+"n");
+                symbolTable.removeSymbol(*$2);
+                symbolTable.nextMemoryAddress=symbolTable.nextMemoryAddress-2;
+                
                 $$ = new std::vector<std::string>(temp1);
 
              }
@@ -297,6 +303,10 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 n=temp1.size();
                 temp1.push_back("JUMP "+to_string(-n)+"\n");
                 temp1=*merge(*temp2,temp1);
+                symbolTable.removeSymbol(*$2+"n");
+                symbolTable.removeSymbol(*$2);
+                symbolTable.nextMemoryAddress=symbolTable.nextMemoryAddress-2;
+
                 $$ = new std::vector<std::string>(temp1);
  
              }
@@ -386,9 +396,11 @@ int main(int argc, char* argv[]) {
         }
     }
 
+      std::string outputFile = (argc > 2) ? argv[2] : "output.mr";
+
     if (yyparse() == 0) {
         std::cout << "Parsing successful!" << std::endl;
-        printCommands(cmd);        
+        printCommands(cmd, outputFile);       
     } else {
         std::cerr << "Parsing failed!" << std::endl;
     }
