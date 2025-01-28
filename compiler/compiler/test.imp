@@ -1,35 +1,25 @@
-# Fibonacci 26
-# ? 1
-# > 121393
+# Silnia+Fibonacci
+# ? 20
+# > 2432902008176640000
+# > 6765
 
 PROGRAM IS
-  a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
+    f[0:100], s[0:100], i[0:100], n,  k, l
 BEGIN
-  READ a;
-  b := a;
-  c := b + a;
-  d := c + b;
-  e := d + c;
-  f := e + d;
-  g := f + e;
-  h := g + f;
-  i := h + g;
-  j := i + h;
-  k := j + i;
-  l := k + j;
-  m := l + k;
-  n := m + l;
-  o := n + m;
-  p := o + n;
-  q := p + o;
-  r := q + p;
-  s := r + q;
-  t := s + r;
-  u := t + s;
-  v := u + t;
-  w := v + u;
-  x := w + v;
-  y := x + w;
-  z := y + x;
-  WRITE z;
+    READ n;
+    f[0] := 0;
+    s[0] := 1;
+    i[0] := 0;
+    f[1] := 1;
+    s[1] := 1;
+    i[1] := 1;
+    FOR j FROM 2 TO n DO
+        k := j - 1;
+        l := k - 1;
+	    i[j] := i[k] + 1;
+	    f[j] := f[k] + f[l];
+        s[j] := s[k] * i[j];
+    ENDFOR
+    WRITE s[n];
+    WRITE f[n];
 END

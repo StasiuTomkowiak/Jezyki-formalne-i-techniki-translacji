@@ -80,7 +80,7 @@ std::vector<std::string> assign(const std::string& identifier,std::vector<std::s
             }
     } catch (const std::runtime_error& e) {
         // Jeśli zmienna nie istnieje, zgłoś błąd
-        std::cerr << "Error: Variable '" << identifier << "' not declared.\n";
+        std::cerr << "Error: Variable '" << identifier << "' not declared or assigning loop variable.\n";
         exit(1); // Możesz zastąpić bardziej eleganckim zarządzaniem błędami
     } 
     array_index.pop_back(); 
