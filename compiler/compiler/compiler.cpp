@@ -36,7 +36,7 @@ std::vector<std::string> write(const std::string& value,std::vector<std::string>
         try {
             // Spróbuj znaleźć symbol w tablicy symboli
             Symbol symbol = symbolTable.findSymbol(value);
-
+            
             // Sprawdź typ symbolu i wygeneruj odpowiednią komendę
             if (symbol.type == "variable") {
                 result.push_back("PUT " + std::to_string(symbol.memoryAddress) + "\n");
@@ -62,8 +62,10 @@ std::vector<std::string> assign(const std::string& identifier,std::vector<std::s
     std::vector<std::string> result;
     int n=array_index.size();
     try {
+        
         // Sprawdź, czy zmienna istnieje
         Symbol symbol = symbolTable.findSymbol(identifier);
+        if(symbol.petlowa==false){
         if(symbol.type=="variable"){
         result.push_back("STORE "+ std::to_string(symbol.memoryAddress) + "\n");
         
@@ -73,6 +75,9 @@ std::vector<std::string> assign(const std::string& identifier,std::vector<std::s
             result = assign_array( array_index, n-1,1,symbol.range,symbol.memoryAddress,symbolTable);
                  
         }
+        }else{
+                throw std::runtime_error("ASSINING loop variable.");
+            }
     } catch (const std::runtime_error& e) {
         // Jeśli zmienna nie istnieje, zgłoś błąd
         std::cerr << "Error: Variable '" << identifier << "' not declared.\n";
@@ -642,6 +647,7 @@ std::vector<std::string> mul(const std::string& value1, const std::string& value
             }
             else if(symbol1.type=="array"&&symbol2.type=="variable"){
                 std::vector<std::string> temp;   
+
                 result=load_array( array_index, n-2 ,1,symbol1.range,symbol1.memoryAddress,symbolTable);
                 result.push_back("JPOS 8\n");
                 result.push_back("STORE 5\n");
@@ -662,9 +668,9 @@ std::vector<std::string> mul(const std::string& value1, const std::string& value
                 result.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
                 result.push_back("STORE 2\n");
         
-
                 result.push_back("SET 0\n");
                 result.push_back("STORE 5\n");
+
                 temp = mul_pos();
                 result.insert(result.end(), temp.begin(), temp.end());
             }
@@ -894,11 +900,6 @@ std::vector<std::string> mul_pos() {
     result.push_back("SUB 5\n");
     result.push_back("STORE 5\n");
     result.push_back("LOAD 5\n");
-
-
-
-    
-
 
     return result;
 }

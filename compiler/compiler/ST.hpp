@@ -16,6 +16,8 @@ struct Symbol {
     int scopeLevel;                           // Poziom zakresu (zagnieżdżenie)
     std::pair<int, int> range;                // Zakres (dla tablic, np. [-10, 10])
     std::vector<std::string> parameters;     // Parametry procedury (jeśli dotyczy)
+    bool petlowa=false;
+    
 };
 
 // Tablica symboli

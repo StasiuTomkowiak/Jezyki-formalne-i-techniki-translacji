@@ -108,63 +108,197 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 $$ = new std::vector<std::string>(temp3);
 
              }
-             | FOR pidentifier FROM value TO value DO commands ENDFOR{
-                
-                // add symbol
+             | FOR pidentifier FROM value {
                 Symbol newSymbol;
                 newSymbol.name = *$2;
                 newSymbol.type = "variable";
+                newSymbol.petlowa=true;
                 newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addSymbol(*$2, newSymbol);
                 
-                std::vector<std::string> temp1(*$8);
-                
+                Symbol newSymbol1;
+                newSymbol1.name = *$2+"n";
+                newSymbol1.type = "variable";
+                newSymbol1.petlowa=true;
+                newSymbol1.memoryAddress = symbolTable.nextMemoryAddress;
+                newSymbol1.scopeLevel = symbolTable.currentScope;
+                symbolTable.addSymbol((*$2+"n"), newSymbol1);
+            
+             }  TO value DO commands ENDFOR{                
+                std::vector<std::string> temp1(*$9);
                 std::vector<std::string>* temp2=new std::vector<std::string>();
+                
+                if(isNumber(*$4)&&isNumber(*$7)){
+                temp2->push_back("SET " + *$4 +"\n");
+                temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+                temp2->push_back("SET " + *$7 +"\n");
+                temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n"); 
+                }
+                else if(isNumber(*$4)&&symbolTable.symbolExist(*$7)){
+                    temp2->push_back("SET " + *$4 +"\n");
+                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+                    if(symbolTable.findSymbol(*$7).type=="variable"){
+                        temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$7).memoryAddress)+"\n");
+                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(*$7).type=="array"){
+                        std::vector<std::string> vec;  
+                        vec=load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(*$7).range,symbolTable.findSymbol(*$7).memoryAddress,symbolTable);
+                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
+                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
+                    }
+                }
+                else if(symbolTable.symbolExist(*$4)&&isNumber(*$7)){
+                    if(symbolTable.findSymbol(*$4).type=="variable"){
+                    temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$4).memoryAddress)+"\n");
+                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(*$4).type=="array"){
+                        std::vector<std::string> vec;  
+                        vec=load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(*$4).range,symbolTable.findSymbol(*$4).memoryAddress,symbolTable);
+                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
+                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+                    }
+                    temp2->push_back("SET " + *$7 +"\n");
+                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
+                }
+                else if(symbolTable.symbolExist(*$4)&&symbolTable.symbolExist(*$7)){
+                    if(symbolTable.findSymbol(*$4).type=="variable"){
+                    temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$4).memoryAddress)+"\n");
+                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(*$4).type=="array"){ 
+                        std::vector<std::string> vec;  
+                        vec=load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(*$4).range,symbolTable.findSymbol(*$4).memoryAddress,symbolTable);
+                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
+                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+                        temp2->push_back("SET 0\n");
+                    }
+                    if(symbolTable.findSymbol(*$7).type=="variable"){
+                        temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$7).memoryAddress)+"\n");
+                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(*$7).type=="array"){
+                        std::vector<std::string> vec;  
+                        vec=load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(*$7).range,symbolTable.findSymbol(*$7).memoryAddress,symbolTable);
+                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
+                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
+                    }
+                }else{
+                throw std::runtime_error("WRONG values in for declaeration.");
+                }
+
                 std::vector<std::string>* temp3 = new std::vector<std::string>();
                 temp3->push_back(*$2);
-                temp3->push_back(*$6);
+                temp3->push_back(*$2+"n");
                 temp3->push_back("LEQ");
+    
+                string secondLast = array_index[array_index.size() - 2];
+                string last = array_index[array_index.size() - 1];
+                array_index.push_back(secondLast);
+                array_index.push_back(last);   
+
                 temp1=(*merge(temp1,for_to(*$2,array_index, symbolTable)));
                 int n=temp1.size();
-                temp1=(*merge(temp1,if_then(*temp3,1,array_index,symbolTable)));
+                temp1=(*merge(if_then(*temp3,temp1.size()+1,array_index,symbolTable),temp1));
                 n=temp1.size();
                 temp1.push_back("JUMP "+to_string(-n)+"\n");
                 temp1=*merge(*temp2,temp1);
                 $$ = new std::vector<std::string>(temp1);
 
-
              }
-             | FOR pidentifier FROM value DOWNTO value DO commands ENDFOR{
-                 std::vector<std::string> temp1(*$8);
+             | FOR pidentifier  FROM value 
+             {
                 
-                // add symbol
                 Symbol newSymbol;
                 newSymbol.name = *$2;
                 newSymbol.type = "variable";
                 newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addSymbol(*$2, newSymbol);
-
-
+                
+                Symbol newSymbol1;
+                newSymbol1.name = *$2+"n";
+                newSymbol1.type = "variable";
+                newSymbol1.memoryAddress = symbolTable.nextMemoryAddress;
+                newSymbol1.scopeLevel = symbolTable.currentScope;
+                symbolTable.addSymbol((*$2+"n"), newSymbol1);
+            
+             }DOWNTO value DO commands ENDFOR{
+                std::vector<std::string> temp1(*$9);
                 std::vector<std::string>* temp2=new std::vector<std::string>();
-                temp2->push_back("SET " + *$4+"\n");
+                
+                if(isNumber(*$4)&&isNumber(*$7)){
+                temp2->push_back("SET " + *$4 +"\n");
                 temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
-                temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+                temp2->push_back("SET " + *$7 +"\n");
+                temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n"); 
+                }
+                else if(isNumber(*$4)&&symbolTable.symbolExist(*$7)){
+                    temp2->push_back("SET " + *$4 +"\n");
+                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+                    if(symbolTable.findSymbol(*$7).type=="variable"){
+                        temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$7).memoryAddress)+"\n");
+                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(*$7).type=="array"){
+                        std::vector<std::string> vec;  
+                        vec=load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(*$7).range,symbolTable.findSymbol(*$7).memoryAddress,symbolTable);
+                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
+                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
+                    }
+                }
+                else if(symbolTable.symbolExist(*$4)&&isNumber(*$7)){
+                    if(symbolTable.findSymbol(*$4).type=="variable"){
+                    temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$4).memoryAddress)+"\n");
+                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(*$4).type=="array"){
+                        std::vector<std::string> vec;  
+                        vec=load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(*$4).range,symbolTable.findSymbol(*$4).memoryAddress,symbolTable);
+                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
+                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+                    }
+                    temp2->push_back("SET " + *$7 +"\n");
+                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
+                }
+                else if(symbolTable.symbolExist(*$4)&&symbolTable.symbolExist(*$7)){
+                    if(symbolTable.findSymbol(*$4).type=="variable"){
+                    temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$4).memoryAddress)+"\n");
+                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(*$4).type=="array"){ 
+                        std::vector<std::string> vec;  
+                        vec=load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(*$4).range,symbolTable.findSymbol(*$4).memoryAddress,symbolTable);
+                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
+                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
+                        temp2->push_back("SET 0\n");
+                    }
+                    if(symbolTable.findSymbol(*$7).type=="variable"){
+                        temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$7).memoryAddress)+"\n");
+                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(*$7).type=="array"){
+                        std::vector<std::string> vec;  
+                        vec=load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(*$7).range,symbolTable.findSymbol(*$7).memoryAddress,symbolTable);
+                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
+                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
+                    }
+                }else{
+                throw std::runtime_error("WRONG values in for declaeration.");
+                }
 
                 std::vector<std::string>* temp3 = new std::vector<std::string>();
-
                 temp3->push_back(*$2);
-                temp3->push_back(*$6);
+                temp3->push_back(*$2+"n");
                 temp3->push_back("GEQ");
+    
+                string secondLast = array_index[array_index.size() - 2];
+                string last = array_index[array_index.size() - 1];
+                array_index.push_back(secondLast);
+                array_index.push_back(last);   
+
                 temp1=(*merge(temp1,for_downto(*$2,array_index, symbolTable)));
                 int n=temp1.size();
-                temp1=(*merge(temp1,if_then(*temp3,1,array_index,symbolTable)));
+                temp1=(*merge(if_then(*temp3,temp1.size()+1,array_index,symbolTable),temp1));
                 n=temp1.size();
                 temp1.push_back("JUMP "+to_string(-n)+"\n");
                 temp1=*merge(*temp2,temp1);
                 $$ = new std::vector<std::string>(temp1);
-
+ 
              }
              | proc_call SEMICOLON
              | READ identifier SEMICOLON       {$$= new std::vector<std::string>(read(*$2,array_index, symbolTable));}             
@@ -239,7 +373,9 @@ minnum       : num           { $$ = $1;}
 identifier:    pidentifier { $$ = $1; array_index.push_back("0");}
              | pidentifier LBRCKT pidentifier RBRCKT { array_index.push_back(*$3); $$ = $1;  } 
              | pidentifier LBRCKT minnum RBRCKT { array_index.push_back(std::to_string($3)); $$ = $1;  }
+
 ;
+
 %%
 int main(int argc, char* argv[]) {
     if (argc > 1) {
@@ -261,6 +397,6 @@ int main(int argc, char* argv[]) {
 }
 
 int yyerror(const char* err) {
-    std::cerr << "Error: " << err << " at line " << yylineno << std::endl;
+    std::cerr << "Error: " << err << " at line " << yylineno -1<< std::endl;
     return 1;
 }
