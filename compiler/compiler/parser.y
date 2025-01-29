@@ -14,6 +14,9 @@ extern FILE *yyin;
 int yyerror(const char* err);
 SymbolTable symbolTable; // Globalna tablica symboli
 std::vector<std::string> cmd;
+std::vector<std::string> procedures;
+std::vector<std::string> all;
+
 std::vector<std::string> array_index;
 
 %}
@@ -24,6 +27,8 @@ std::vector<std::string> array_index;
     std::vector<std::string>* condition;
     std::vector<std::string>* commands;
     std::vector<std::string>* expression;
+    std::vector<std::string>* main;
+
 }
 
 %token PROGRAM IS _BEGIN END PROCEDURE DECLARE
@@ -44,21 +49,48 @@ std::vector<std::string> array_index;
 %type <commands> commands
 %type <commands> command
 %type <expression> expression
+%type <main> main
+%type <main> procedures
+%type <main> procedure
+
+
+
 
 
 %%
 
-program_all  : procedures main
+program_all  : procedures main  {
+    if($1->size()>1){
+    int pro=$1->size();
+    procedures.push_back("JUMP "+std::to_string(pro+1)+"\n");
+    procedures.insert(procedures.end(), $1->begin(), $1->end() );
+    cmd=*merge(*$2, end());
+    all=*merge(procedures, cmd);}
+    else 
+
+    all=*merge(*$2, end());
+}
 ;
-procedures   : procedures PROCEDURE proc_head IS declarations _BEGIN commands END   {}
-             | procedures PROCEDURE proc_head IS _BEGIN commands END                {}
-             | 
+procedures   :  procedures procedure               {
+                $$ = new std::vector<std::string>(*merge(*$1, *$2));
+                }
+             | {$$ = new std::vector<std::string>;}
 ;
-main         : PROGRAM IS declarations _BEGIN commands END                           {cmd = *merge(*$5, end());}
-             | PROGRAM IS _BEGIN commands END                                       {cmd = *merge(*$4,end());}
+procedure:       PROCEDURE proc_head IS _BEGIN commands END 
+                {
+                $$ = new std::vector<std::string>( *merge(*$5, rtn()));
+                }
+                |PROCEDURE proc_head IS declarations _BEGIN commands END 
+                ;
+
+main         : PROGRAM IS declarations _BEGIN commands END                           {$$ = new std::vector<std::string>( *$5);}
+             | PROGRAM IS _BEGIN commands END                                       {$$ = new std::vector<std::string>(*$4);}
 ;
-commands     : commands command   { $$ = new std::vector<std::string>(*merge(*$1, *$2));}                                                  
-             | command            { $$= new std::vector<std::string>(*($1)); }  
+commands     : commands command    {$$ = new std::vector<std::string>(*merge(*$1, *$2));}                                                  
+             | command{ 
+                $$= new std::vector<std::string>(*($1));
+       
+                }  
 ;
 command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std::string>(*merge(*$3, assign(*$1, array_index,  symbolTable)));}
              | IF condition THEN commands ELSE commands ENDIF{
@@ -81,16 +113,19 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                     result.push_back(temp3.back());
                     result.insert(result.end(), temp2.begin(), temp2.end());
                     }
+                    
                     $$ = new std::vector<std::string>(result);
+             
              }
-             | IF condition  THEN commands ENDIF  {
+             | IF condition THEN commands ENDIF  {
                 std::vector<std::string> temp2(*$4);
                 int n=temp2.size();
                 std::vector<std::string> temp1(if_then(*$2,n,array_index,symbolTable));
                 $$ = new std::vector<std::string>(*merge(temp1,temp2));
+             
                     
              }
-             | WHILE condition DO commands ENDWHILE{
+             | WHILE condition DO  commands ENDWHILE{
                 std::vector<std::string> temp2(*$4);
                 int n=temp2.size();
                 std::vector<std::string> temp1(if_then(*$2,n+1,array_index,symbolTable));
@@ -98,6 +133,7 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 n=temp3.size();
                 temp3.push_back("JUMP "+to_string(-n)+"\n");
                 $$ = new std::vector<std::string>(temp3);
+               
              }
              | REPEAT commands UNTIL condition SEMICOLON {
                 std::vector<std::string> temp2(*$2);
@@ -107,6 +143,7 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 n=temp3.size();
                 temp3.push_back("JUMP "+to_string(-n)+"\n");
                 $$ = new std::vector<std::string>(temp3);
+             
 
              }
              | FOR pidentifier FROM value {
@@ -127,7 +164,7 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 symbolTable.addSymbol((*$2+"n"), newSymbol1);
             
              }  TO value DO commands ENDFOR{                
-                std::vector<std::string> temp1(*$9);
+                
                 std::vector<std::string>* temp2=new std::vector<std::string>();
                 
                 if(isNumber(*$4)&&isNumber(*$7)){
@@ -185,7 +222,7 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 }else{
                 throw std::runtime_error("WRONG values in for declaeration.");
                 }
-
+                
                 std::vector<std::string>* temp3 = new std::vector<std::string>();
                 temp3->push_back(*$2);
                 temp3->push_back(*$2+"n");
@@ -195,7 +232,7 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 string last = array_index[array_index.size() - 1];
                 array_index.push_back(secondLast);
                 array_index.push_back(last);   
-
+                std::vector<std::string> temp1(*$9);
                 temp1=(*merge(temp1,for_to(*$2,array_index, symbolTable)));
                 int n=temp1.size();
                 temp1=(*merge(if_then(*temp3,temp1.size()+1,array_index,symbolTable),temp1));
@@ -208,7 +245,7 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 symbolTable.nextMemoryAddress=symbolTable.nextMemoryAddress-2;
                 
                 $$ = new std::vector<std::string>(temp1);
-
+                
              }
              | FOR pidentifier  FROM value 
              {
@@ -308,7 +345,7 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 symbolTable.nextMemoryAddress=symbolTable.nextMemoryAddress-2;
 
                 $$ = new std::vector<std::string>(temp1);
- 
+              
              }
              | proc_call SEMICOLON
              | READ identifier SEMICOLON       {$$= new std::vector<std::string>(read(*$2,array_index, symbolTable));}             
@@ -353,9 +390,10 @@ declarations : declarations  COMMA pidentifier {
                 symbolTable.addArray(*$1, newSymbol);}
 ;
 args_decl    : args_decl  COMMA pidentifier
-             | args_decl COMMA TABLE pidentifier 
+             | args_decl COMMA TABLE pidentifier
              | pidentifier
              | TABLE pidentifier
+
 ;
 args         : args  COMMA pidentifier
              | pidentifier
@@ -400,7 +438,8 @@ int main(int argc, char* argv[]) {
 
     if (yyparse() == 0) {
         std::cout << "Parsing successful!" << std::endl;
-        printCommands(cmd, outputFile);       
+        STORE7(all);
+        printCommands(all, outputFile);       
     } else {
         std::cerr << "Parsing failed!" << std::endl;
     }

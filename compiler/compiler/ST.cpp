@@ -42,14 +42,14 @@ int SymbolTable::calculateRangeLength(const Symbol& symbol) {
 // Wyszukiwanie symbolu
 Symbol SymbolTable::findSymbol(const std::string& name) const {
     auto it = table.find(name);
-    if (it == table.end() || it->second.scopeLevel > currentScope) {
+    if (it == table.end() || it->second.scopeLevel > currentScope||it->second.scopeLevel < currentScope) {
         throw std::runtime_error("Symbol not found or out of scope: " + name);
     }
     return it->second;
 }
 bool SymbolTable::symbolExist(const std::string& name) const {
     auto it = table.find(name);
-    if (it == table.end() || it->second.scopeLevel > currentScope) {
+    if (it == table.end() || it->second.scopeLevel > currentScope||it->second.scopeLevel < currentScope) {
         return false;
     }
     return true;
@@ -89,7 +89,6 @@ void SymbolTable::enterScope() {
 }
 
 void SymbolTable::exitScope() {
-    removeCurrentScope();
     --currentScope;
 }
 

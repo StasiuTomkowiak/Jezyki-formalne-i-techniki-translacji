@@ -1,16 +1,27 @@
+PROCEDURE pd(a,b) IS
+BEGIN
+ WRITE 2;
+END
+PROCEDURE a(a,b) IS
+BEGIN
+ WRITE 2;
+END
 PROGRAM IS
-  n, p  # Deklaracja tablicy od -5 do 5
+  n, p # Deklaracja tablicy od -5 do 5
 
 BEGIN
  READ n;
- REPEAT 
+    REPEAT
  p:=n/2;
  p:=2*p;
  IF n>p THEN
  WRITE 1;
  ELSE 
  WRITE 0;
+ 
  ENDIF
  n:=n/2;
- UNTIL n=0;
+UNTIL n=0;
+
+
 END

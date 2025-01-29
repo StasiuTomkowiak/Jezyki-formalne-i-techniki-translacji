@@ -68,6 +68,8 @@ std::vector<std::string> assign(const std::string& identifier,std::vector<std::s
         if(symbol.petlowa==false){
         if(symbol.type=="variable"){
         result.push_back("STORE "+ std::to_string(symbol.memoryAddress) + "\n");
+        result.push_back("SET 0\n");
+
         
         }
         else if(symbol.type=="array"){
@@ -1050,6 +1052,12 @@ std::vector<std::string> end()
     result.push_back("HALT");
     return result;
 }
+std::vector<std::string> rtn()
+{
+    std::vector<std::string> result;
+    result.push_back("RTRN 7\n");
+    return result;
+}
 
 std::vector<std::string>* merge(const std::vector<std::string>& vec1, const std::vector<std::string>& vec2) {
     auto* result = new std::vector<std::string>(vec1); // Tworzenie kopii vec1
@@ -1071,22 +1079,7 @@ bool isNumber(const std::string& s) {
         return true;
     }
 }
-void printCommands(const std::vector<std::string>& result, const std::string& outputFile) {
-    std::ofstream outFile(outputFile);
-    if (!outFile) {
-        std::cerr << "Cannot open output file: " << outputFile << std::endl;
-        return;
-    }
 
-    std::cout << "Saving commands to " << outputFile << std::endl;
-
-    for (const auto& command : result) {
-        outFile << command;  // Zapisanie każdej komendy do pliku
-    }
-
-    outFile.close();
-    std::cout << "Commands saved successfully." << std::endl;
-}
 
 std::vector<std::string> assign_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress,const SymbolTable& symbolTable) {
     std::vector<std::string> result;
@@ -1106,6 +1099,8 @@ std::vector<std::string> assign_array(const std::vector<std::string>& array, int
         result.push_back("STORE " + to_string(sym_num)+ "\n");
         result.push_back("LOAD 5\n");
         result.push_back("STOREI " + to_string(sym_num)+ "\n");
+        result.push_back("SET 0");
+
     }
     return result;
 }
@@ -1312,9 +1307,41 @@ std::vector<std::string> div_pos() {
     result.push_back("STORE 3\n");
 
     result.push_back("SET 0\n");
+    result.push_back("STORE 1\n");
+    result.push_back("STORE 2\n");
+    result.push_back("STORE 4\n");
+    result.push_back("STORE 5\n");
     result.push_back("STORE 6\n");
+
     result.push_back("LOAD 3\n");
 
 
     return result;
+}
+void STORE7(std::vector<std::string>& result) {
+   
+    
+    for (int i =0;i<=result.size()-1;i++) {
+        if(result[i]=="STORE 7\n"){
+            result[i-1]="SET "+std::to_string(i+2)+"\n";
+            std::cout << i+1 << std::endl;
+        }
+    }
+}
+
+void printCommands(const std::vector<std::string>& result, const std::string& outputFile) {
+    std::ofstream outFile(outputFile);
+    if (!outFile) {
+        std::cerr << "Cannot open output file: " << outputFile << std::endl;
+        return;
+    }
+
+    std::cout << "Saving commands to " << outputFile << std::endl;
+
+    for (const auto& command : result) {
+        outFile << command;  // Zapisanie każdej komendy do pliku
+    }
+
+    outFile.close();
+    std::cout << "Commands saved successfully." << std::endl;
 }

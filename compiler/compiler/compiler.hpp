@@ -42,6 +42,7 @@ std::vector<std::string> div(const std::string& value1, const std::string& value
 
 
 std::vector<std::string> end();
+std::vector<std::string> rtn();
 
 std::vector<std::string>* merge(const std::vector<std::string>& vec1, const std::vector<std::string>& vec2);
 
@@ -49,4 +50,5 @@ bool isNumber(const std::string& s);
 void printCommands(const std::vector<std::string>& result, const std::string& outputFile);
 std::vector<std::string> mul_pos();
 std::vector<std::string> div_pos();
+void STORE7(std::vector<std::string>& result);
 
