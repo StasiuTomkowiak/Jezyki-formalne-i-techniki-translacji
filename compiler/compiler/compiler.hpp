@@ -38,6 +38,7 @@ std::vector<std::string> value_e(const std::string& value1,std::vector<std::stri
 std::vector<std::string> add(const std::string& value1, const std::string& value2,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
 std::vector<std::string> sub(const std::string& value1, const std::string& value2,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
 std::vector<std::string> mul(const std::string& value1, const std::string& value2,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
+std::vector<std::string> div(const std::string& value1, const std::string& value2,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
 
 
 std::vector<std::string> end();
@@ -47,3 +48,5 @@ std::vector<std::string>* merge(const std::vector<std::string>& vec1, const std:
 bool isNumber(const std::string& s);
 void printCommands(const std::vector<std::string>& result, const std::string& outputFile);
 std::vector<std::string> mul_pos();
+std::vector<std::string> div_pos();
+
