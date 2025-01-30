@@ -16,8 +16,15 @@ SymbolTable symbolTable; // Globalna tablica symboli
 std::vector<std::string> cmd;
 std::vector<std::string> procedures;
 std::vector<std::string> all;
-
+std::vector<std::string> commands;
 std::vector<std::string> array_index;
+std::vector<int> command_line;
+
+int while_line=0;
+int while_line1=0;
+int while_line2=0;
+bool e=false;
+
 
 %}
 
@@ -25,7 +32,7 @@ std::vector<std::string> array_index;
     int num;
     std::string* pidentifier;
     std::vector<std::string>* condition;
-    std::vector<std::string>* commands;
+   
     std::vector<std::string>* expression;
     std::vector<std::string>* main;
 
@@ -46,12 +53,8 @@ std::vector<std::string> array_index;
 %type  <num> minnum
 %type  <condition> condition
 %type <pidentifier> value
-%type <commands> commands
-%type <commands> command
 %type <expression> expression
-%type <main> main
-%type <main> procedures
-%type <main> procedure
+
 
 
 
@@ -60,91 +63,55 @@ std::vector<std::string> array_index;
 %%
 
 program_all  : procedures main  {
-    if($1->size()>1){
-    int pro=$1->size();
-    procedures.push_back("JUMP "+std::to_string(pro+1)+"\n");
-    procedures.insert(procedures.end(), $1->begin(), $1->end() );
-    cmd=*merge(*$2, end());
-    all=*merge(procedures, cmd);}
-    else 
-
-    all=*merge(*$2, end());
+    
 }
 ;
-procedures   :  procedures procedure               {
-                $$ = new std::vector<std::string>(*merge(*$1, *$2));
-                }
-             | {$$ = new std::vector<std::string>;}
+procedures   :  procedures procedure       
+             | 
 ;
 procedure:       PROCEDURE proc_head IS _BEGIN commands END 
                 {
-                $$ = new std::vector<std::string>( *merge(*$5, rtn()));
+                
                 }
                 |PROCEDURE proc_head IS declarations _BEGIN commands END 
                 ;
 
-main         : PROGRAM IS declarations _BEGIN commands END                           {$$ = new std::vector<std::string>( *$5);}
-             | PROGRAM IS _BEGIN commands END                                       {$$ = new std::vector<std::string>(*$4);}
+main         : PROGRAM IS declarations _BEGIN commands END   {end();}                        
+             | PROGRAM IS _BEGIN commands END                                     
 ;
-commands     : commands command    {$$ = new std::vector<std::string>(*merge(*$1, *$2));}                                                  
-             | command{ 
-                $$= new std::vector<std::string>(*($1));
-       
-                }  
+commands     : commands command                                                
+             | command  
 ;
-command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std::string>(*merge(*$3, assign(*$1, array_index,  symbolTable)));}
-             | IF condition THEN commands ELSE commands ENDIF{
-                    std::vector<std::string> temp1(*$4);
-                    std::vector<std::string> temp2(*$6);
-                    int first=temp1.size();
-                    int second=temp2.size();
-                    std::vector<std::string> cond(*$2);
-                    std::vector<std::string> temp3(if_then_else(*$2,first,second,array_index,symbolTable));
+else         : ELSE commands {
+                command_line.push_back(commands.size());
+                e=true;
+                }   
+            | {e=false;}
+;
+command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,  symbolTable);}
+           
+             | IF condition THEN {command_line.push_back(commands.size());} commands {command_line.push_back(commands.size());} else ENDIF  {
+                if(e==false){
+                if_then(*$2, command_line[command_line.size()-1]-command_line[command_line.size()-2],array_index,  symbolTable);
+                 command_line.pop_back();
+                  command_line.pop_back();
+                }else if(e=true){
+                    if_then_else(*$2, command_line[command_line.size()-2]-command_line[command_line.size()-3],command_line[command_line.size()-1]-command_line[command_line.size()-2],array_index,  symbolTable);
+                    command_line.pop_back();
+                    command_line.pop_back();
+                    command_line.pop_back();
+                }
+                
+             }
+             | WHILE condition DO{command_line.push_back(commands.size());}  commands {command_line.push_back(commands.size());} ENDWHILE{
+                    while_do(*$2, command_line[command_line.size()-1]-command_line[command_line.size()-2],array_index,  symbolTable);
+                    command_line.pop_back();
+                    command_line.pop_back();
 
-                    std::vector<std::string> result;
-                    if(cond[2]=="EQ"||cond[2]=="GE"||cond[2]=="LE"){
-                    result.insert(result.end(), temp3.begin(), temp3.end() - 1);
-                    result.insert(result.end(), temp2.begin(), temp2.end());
-                    result.push_back(temp3.back());
-                    result.insert(result.end(), temp1.begin(), temp1.end());
-                    }else if (cond[2]=="NEQ"||cond[2]=="GEQ"||cond[2]=="LEQ"){
-                    result.insert(result.end(), temp3.begin(), temp3.end() - 1);
-                    result.insert(result.end(), temp1.begin(), temp1.end());
-                    result.push_back(temp3.back());
-                    result.insert(result.end(), temp2.begin(), temp2.end());
-                    }
-                    
-                    $$ = new std::vector<std::string>(result);
-             
              }
-             | IF condition THEN commands ENDIF  {
-                std::vector<std::string> temp2(*$4);
-                int n=temp2.size();
-                std::vector<std::string> temp1(if_then(*$2,n,array_index,symbolTable));
-                $$ = new std::vector<std::string>(*merge(temp1,temp2));
-             
-                    
-             }
-             | WHILE condition DO  commands ENDWHILE{
-                std::vector<std::string> temp2(*$4);
-                int n=temp2.size();
-                std::vector<std::string> temp1(if_then(*$2,n+1,array_index,symbolTable));
-                std::vector<std::string> temp3(*merge(temp1,temp2));
-                n=temp3.size();
-                temp3.push_back("JUMP "+to_string(-n)+"\n");
-                $$ = new std::vector<std::string>(temp3);
-               
-             }
-             | REPEAT commands UNTIL condition SEMICOLON {
-                std::vector<std::string> temp2(*$2);
-                int n=temp2.size();
-                std::vector<std::string> temp1(repeat_until(*$4,1,array_index,symbolTable));
-                std::vector<std::string> temp3(*merge(temp2,temp1));
-                n=temp3.size();
-                temp3.push_back("JUMP "+to_string(-n)+"\n");
-                $$ = new std::vector<std::string>(temp3);
-             
-
+             | REPEAT {command_line.push_back(commands.size());} commands UNTIL condition SEMICOLON {
+                    repeat_until(*$5, command_line[command_line.size()-1],array_index,  symbolTable);
+                     command_line.pop_back();
              }
              | FOR pidentifier FROM value {
                 Symbol newSymbol;
@@ -165,86 +132,6 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
             
              }  TO value DO commands ENDFOR{                
                 
-                std::vector<std::string>* temp2=new std::vector<std::string>();
-                
-                if(isNumber(*$4)&&isNumber(*$7)){
-                temp2->push_back("SET " + *$4 +"\n");
-                temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
-                temp2->push_back("SET " + *$7 +"\n");
-                temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n"); 
-                }
-                else if(isNumber(*$4)&&symbolTable.symbolExist(*$7)){
-                    temp2->push_back("SET " + *$4 +"\n");
-                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
-                    if(symbolTable.findSymbol(*$7).type=="variable"){
-                        temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$7).memoryAddress)+"\n");
-                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
-                    }else if(symbolTable.findSymbol(*$7).type=="array"){
-                        std::vector<std::string> vec;  
-                        vec=load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(*$7).range,symbolTable.findSymbol(*$7).memoryAddress,symbolTable);
-                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
-                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
-                    }
-                }
-                else if(symbolTable.symbolExist(*$4)&&isNumber(*$7)){
-                    if(symbolTable.findSymbol(*$4).type=="variable"){
-                    temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$4).memoryAddress)+"\n");
-                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
-                    }else if(symbolTable.findSymbol(*$4).type=="array"){
-                        std::vector<std::string> vec;  
-                        vec=load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(*$4).range,symbolTable.findSymbol(*$4).memoryAddress,symbolTable);
-                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
-                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
-                    }
-                    temp2->push_back("SET " + *$7 +"\n");
-                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
-                }
-                else if(symbolTable.symbolExist(*$4)&&symbolTable.symbolExist(*$7)){
-                    if(symbolTable.findSymbol(*$4).type=="variable"){
-                    temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$4).memoryAddress)+"\n");
-                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
-                    }else if(symbolTable.findSymbol(*$4).type=="array"){ 
-                        std::vector<std::string> vec;  
-                        vec=load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(*$4).range,symbolTable.findSymbol(*$4).memoryAddress,symbolTable);
-                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
-                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
-                        temp2->push_back("SET 0\n");
-                    }
-                    if(symbolTable.findSymbol(*$7).type=="variable"){
-                        temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$7).memoryAddress)+"\n");
-                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
-                    }else if(symbolTable.findSymbol(*$7).type=="array"){
-                        std::vector<std::string> vec;  
-                        vec=load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(*$7).range,symbolTable.findSymbol(*$7).memoryAddress,symbolTable);
-                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
-                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
-                    }
-                }else{
-                throw std::runtime_error("WRONG values in for declaeration.");
-                }
-                
-                std::vector<std::string>* temp3 = new std::vector<std::string>();
-                temp3->push_back(*$2);
-                temp3->push_back(*$2+"n");
-                temp3->push_back("LEQ");
-    
-                string secondLast = array_index[array_index.size() - 2];
-                string last = array_index[array_index.size() - 1];
-                array_index.push_back(secondLast);
-                array_index.push_back(last);   
-                std::vector<std::string> temp1(*$9);
-                temp1=(*merge(temp1,for_to(*$2,array_index, symbolTable)));
-                int n=temp1.size();
-                temp1=(*merge(if_then(*temp3,temp1.size()+1,array_index,symbolTable),temp1));
-                n=temp1.size();
-                temp1.push_back("JUMP "+to_string(-n)+"\n");
-                temp1=*merge(*temp2,temp1);
-
-                symbolTable.removeSymbol(*$2+"n");
-                symbolTable.removeSymbol(*$2);
-                symbolTable.nextMemoryAddress=symbolTable.nextMemoryAddress-2;
-                
-                $$ = new std::vector<std::string>(temp1);
                 
              }
              | FOR pidentifier  FROM value 
@@ -264,92 +151,10 @@ command      : identifier ASSIGN expression  SEMICOLON {$$ = new std::vector<std
                 newSymbol1.scopeLevel = symbolTable.currentScope;
                 symbolTable.addSymbol((*$2+"n"), newSymbol1);
             
-             }DOWNTO value DO commands ENDFOR{
-                std::vector<std::string> temp1(*$9);
-                std::vector<std::string>* temp2=new std::vector<std::string>();
-                
-                if(isNumber(*$4)&&isNumber(*$7)){
-                temp2->push_back("SET " + *$4 +"\n");
-                temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
-                temp2->push_back("SET " + *$7 +"\n");
-                temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n"); 
-                }
-                else if(isNumber(*$4)&&symbolTable.symbolExist(*$7)){
-                    temp2->push_back("SET " + *$4 +"\n");
-                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
-                    if(symbolTable.findSymbol(*$7).type=="variable"){
-                        temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$7).memoryAddress)+"\n");
-                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
-                    }else if(symbolTable.findSymbol(*$7).type=="array"){
-                        std::vector<std::string> vec;  
-                        vec=load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(*$7).range,symbolTable.findSymbol(*$7).memoryAddress,symbolTable);
-                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
-                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
-                    }
-                }
-                else if(symbolTable.symbolExist(*$4)&&isNumber(*$7)){
-                    if(symbolTable.findSymbol(*$4).type=="variable"){
-                    temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$4).memoryAddress)+"\n");
-                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
-                    }else if(symbolTable.findSymbol(*$4).type=="array"){
-                        std::vector<std::string> vec;  
-                        vec=load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(*$4).range,symbolTable.findSymbol(*$4).memoryAddress,symbolTable);
-                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
-                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
-                    }
-                    temp2->push_back("SET " + *$7 +"\n");
-                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
-                }
-                else if(symbolTable.symbolExist(*$4)&&symbolTable.symbolExist(*$7)){
-                    if(symbolTable.findSymbol(*$4).type=="variable"){
-                    temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$4).memoryAddress)+"\n");
-                    temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
-                    }else if(symbolTable.findSymbol(*$4).type=="array"){ 
-                        std::vector<std::string> vec;  
-                        vec=load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(*$4).range,symbolTable.findSymbol(*$4).memoryAddress,symbolTable);
-                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
-                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2).memoryAddress)+"\n");
-                        temp2->push_back("SET 0\n");
-                    }
-                    if(symbolTable.findSymbol(*$7).type=="variable"){
-                        temp2->push_back("LOAD " +  std::to_string(symbolTable.findSymbol(*$7).memoryAddress)+"\n");
-                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
-                    }else if(symbolTable.findSymbol(*$7).type=="array"){
-                        std::vector<std::string> vec;  
-                        vec=load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(*$7).range,symbolTable.findSymbol(*$7).memoryAddress,symbolTable);
-                        temp2->insert(temp2->end(), vec.begin(), vec.end()); 
-                        temp2->push_back("STORE " + std::to_string(symbolTable.findSymbol(*$2+"n").memoryAddress)+"\n");
-                    }
-                }else{
-                throw std::runtime_error("WRONG values in for declaeration.");
-                }
-
-                std::vector<std::string>* temp3 = new std::vector<std::string>();
-                temp3->push_back(*$2);
-                temp3->push_back(*$2+"n");
-                temp3->push_back("GEQ");
-    
-                string secondLast = array_index[array_index.size() - 2];
-                string last = array_index[array_index.size() - 1];
-                array_index.push_back(secondLast);
-                array_index.push_back(last);   
-
-                temp1=(*merge(temp1,for_downto(*$2,array_index, symbolTable)));
-                int n=temp1.size();
-                temp1=(*merge(if_then(*temp3,temp1.size()+1,array_index,symbolTable),temp1));
-                n=temp1.size();
-                temp1.push_back("JUMP "+to_string(-n)+"\n");
-                temp1=*merge(*temp2,temp1);
-                symbolTable.removeSymbol(*$2+"n");
-                symbolTable.removeSymbol(*$2);
-                symbolTable.nextMemoryAddress=symbolTable.nextMemoryAddress-2;
-
-                $$ = new std::vector<std::string>(temp1);
-              
-             }
+             }DOWNTO value DO commands ENDFOR
              | proc_call SEMICOLON
-             | READ identifier SEMICOLON       {$$= new std::vector<std::string>(read(*$2,array_index, symbolTable));}             
-             | WRITE value SEMICOLON           { $$ =  new std::vector<std::string>(write(*$2,array_index, symbolTable));}
+             | READ identifier SEMICOLON       {read(*$2,array_index, symbolTable);}             
+             | WRITE value SEMICOLON           {write(*$2,array_index, symbolTable);}
 ;
 proc_head    : pidentifier LPRNT args_decl RPRNT
 ;
@@ -398,11 +203,11 @@ args_decl    : args_decl  COMMA pidentifier
 args         : args  COMMA pidentifier
              | pidentifier
 ;
-expression   : value             {$$ =  new std::vector<std::string>(value_e(*($1), array_index,symbolTable));}  
-             | value ADD value   {$$ =  new std::vector<std::string>(add(*($1), *($3), array_index,symbolTable));}
-             | value SUB value   {$$ =  new std::vector<std::string>(sub(*($1), *($3), array_index, symbolTable));}
-             | value MUL value   {$$ =  new std::vector<std::string>(mul(*($1), *($3), array_index, symbolTable));}
-             | value DIV value   {$$ =  new std::vector<std::string>(div(*($1), *($3), array_index, symbolTable));}
+expression   : value             {value_e(*($1), array_index,symbolTable);}  
+             | value ADD value   {add(*($1), *($3), array_index,symbolTable);}
+             | value SUB value   {sub(*($1), *($3), array_index, symbolTable);}
+             | value MUL value   {mul(*($1), *($3), array_index, symbolTable);}
+             | value DIV value   {div(*($1), *($3), array_index, symbolTable);}
              | value MOD value
 ;
 condition    : value EQ value     {$$ = new std::vector<std::string>{*($1), *($3), "EQ"} ;}
@@ -438,8 +243,8 @@ int main(int argc, char* argv[]) {
 
     if (yyparse() == 0) {
         std::cout << "Parsing successful!" << std::endl;
-        STORE7(all);
-        printCommands(all, outputFile);       
+        
+        printCommands( outputFile);       
     } else {
         std::cerr << "Parsing failed!" << std::endl;
     }

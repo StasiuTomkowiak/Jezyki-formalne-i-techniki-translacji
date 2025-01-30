@@ -1,27 +1,32 @@
-PROCEDURE pd(a,b) IS
-BEGIN
- WRITE 2;
-END
-PROCEDURE a(a,b) IS
-BEGIN
- WRITE 2;
-END
+# zagnieżdżone pętle 
+#	0 0 0
+#	31000 40900 2222010
+#	
+#	1 0 2
+#	31001 40900 2222012
+
 PROGRAM IS
-  n, p # Deklaracja tablicy od -5 do 5
-
+	a, b, c, i, j, k
 BEGIN
- READ n;
-    REPEAT
- p:=n/2;
- p:=2*p;
- IF n>p THEN
- WRITE 1;
- ELSE 
- WRITE 0;
- 
- ENDIF
- n:=n/2;
-UNTIL n=0;
-
-
+	READ a;
+	READ b;
+	READ c;
+	i:=111091;
+	WHILE i<=111110 DO
+		j:=209;
+		WHILE j>=200 DO
+			k:=11;
+			WHILE k<=20 DO
+				a:=a+k;
+				k:=k+1;
+			ENDWHILE
+			b:=b+j;
+			j:=j-1;
+		ENDWHILE
+		c:=c+i;
+                i:=i+1;
+	ENDWHILE
+	WRITE a;
+	WRITE b;
+	WRITE c;
 END
