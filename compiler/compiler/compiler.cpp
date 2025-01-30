@@ -1090,7 +1090,6 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
 
                 load_array( array_index, n-1 ,2,symbol2.range,symbol2.memoryAddress,symbolTable);
                 
-                div_pos();
 
                 commands.push_back("JZERO "+ std::to_string(58) + "\n");
                 commands.push_back("JPOS 9\n");
@@ -1160,6 +1159,330 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
                 commands.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
                 commands.push_back("STORE 2\n");
                 div_pos();
+                
+            }
+        } catch (const std::runtime_error& e) {
+            std::cerr << "Error in DIV: " << e.what() << "\n";
+            exit(1);
+        }
+    }
+    array_index.pop_back();
+    array_index.pop_back();
+ 
+}
+void mod(const std::string& value1, const std::string& value2, std::vector<std::string>& array_index,const SymbolTable& symbolTable) {
+
+    int n=array_index.size();
+    if (isNumber(value1) && isNumber(value2)) { 
+        if(value2=="0"){
+            commands.push_back("SET 0\n");
+        }
+        else{
+                commands.push_back("SET " + value1 + "\n");
+                commands.push_back("JPOS 4\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 6\n");
+                std::string modified = std::string(value1.c_str() + 1);
+                if(modified==""){
+                    modified="0";
+                }
+                commands.push_back("SET " + modified + "\n");
+                commands.push_back("STORE 1\n");
+
+                commands.push_back("SET " + value2 + "\n");
+                commands.push_back("JPOS 4\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 7\n");
+                
+
+                modified = std::string(value2.c_str()+1);
+                if(modified==""){
+                    modified="0";
+                }
+                commands.push_back("SET " + modified + "\n");
+                commands.push_back("STORE 8\n");
+                commands.push_back("STORE 2\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("STORE 3\n");
+
+                 mod_pos();
+               
+        } 
+
+    } else if (isNumber(value1)) {
+        // Pierwszy argument to liczba, drugi to zmienna
+        int number1 = std::stoi(value1);
+        try {
+            Symbol symbol2 = symbolTable.findSymbol(value2);
+            
+            if(symbol2.type=="variable"){
+                 
+                commands.push_back("SET " + value1 + "\n");
+                commands.push_back("JPOS 4\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 6\n");
+                std::string modified = std::string(value1.c_str() + 1);
+                if(modified==""){
+                        modified="0";
+                }
+                commands.push_back("SET " + modified + "\n");
+                commands.push_back("STORE 1\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("STORE 3\n");
+                commands.push_back("LOAD " + std::to_string(symbol2.memoryAddress) + "\n");
+                
+                commands.push_back("JZERO "+ std::to_string(55) + "\n");
+                commands.push_back("JPOS 6\n");
+                commands.push_back("SET 1\n");
+                
+                commands.push_back("STORE 7\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
+                commands.push_back("STORE 2\n");
+                commands.push_back("STORE 8\n");
+
+                mod_pos();
+                
+                
+               
+        }   
+            else if(symbol2.type=="array"){       
+             
+                commands.push_back("SET 0\n");
+                commands.push_back("STORE 3\n");
+
+                commands.push_back("SET " + value1 + "\n");
+                commands.push_back("JPOS 4\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 6\n");
+                std::string modified = std::string(value1.c_str() + 1);
+                if(modified==""){
+                        modified="0";
+                }
+                commands.push_back("SET " + modified + "\n");
+                commands.push_back("STORE 1\n");
+                
+                load_array( array_index, n-1 ,2,symbol2.range,symbol2.memoryAddress,symbolTable);  
+                
+
+                commands.push_back("JZERO "+ std::to_string(58) + "\n");
+                commands.push_back("JPOS 8\n");
+                commands.push_back("STORE 5\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("SUB 5\n");
+                commands.push_back("STORE 2\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 7\n");
+                commands.push_back("JUMP 2\n");                
+                commands.push_back("STORE 2\n");
+                commands.push_back("STORE 8\n");
+
+                mod_pos();
+                               
+        }
+        } catch (const std::runtime_error& e) {
+            std::cerr << "Error in DIV: " << e.what() << "\n";
+            exit(1);
+        }
+    } else if (isNumber(value2)) {
+        // Drugi argument to liczba, pierwszy to zmienna
+        int number2 = std::stoi(value2);
+        try {
+            Symbol symbol1 = symbolTable.findSymbol(value1);
+            if(value2=="0"){
+                commands.push_back("SET 0\n");
+            }
+            else if(symbol1.type=="variable"){
+                commands.push_back("SET " + value2 + "\n");
+                commands.push_back("JPOS 4\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 7\n");
+                std::string modified = std::string(value2.c_str() + 1);
+                if(modified==""){
+                        modified="0";
+                }
+                commands.push_back("SET " + modified + "\n");
+                commands.push_back("STORE 2\n");
+                commands.push_back("STORE 8\n");
+
+
+                commands.push_back("SET 0\n");
+                commands.push_back("STORE 3\n");
+
+                commands.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
+                commands.push_back("JPOS 6\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 6\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("SUB " + std::to_string(symbol1.memoryAddress) + "\n");
+                commands.push_back("STORE 1\n");
+
+                mod_pos();
+               
+            }
+            else if(symbol1.type=="array"){
+                 
+                commands.push_back("SET " + value2 + "\n");
+                commands.push_back("JPOS 4\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 7\n");
+                std::string modified = std::string(value2.c_str() + 1);
+                if(modified==""){
+                        modified="0";
+                }
+                commands.push_back("SET " + modified + "\n");
+                commands.push_back("STORE 2\n");
+                commands.push_back("STORE 8\n");
+
+
+                load_array( array_index, n-2 ,1,symbol1.range,symbol1.memoryAddress,symbolTable);
+               
+                commands.push_back("JPOS 8\n");
+                commands.push_back("STORE 5\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("SUB 5\n");
+                commands.push_back("STORE 1\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 6\n");
+                commands.push_back("JUMP 2\n");                
+                commands.push_back("STORE 1\n");
+
+                commands.push_back("SET 0\n");
+                commands.push_back("STORE 3\n");
+
+                mod_pos();
+                 
+      
+        }
+        } catch (const std::runtime_error& e) {
+            std::cerr << "Error in DIV: " << e.what() << "\n";
+            exit(1);
+        }
+    } else {
+        // Oba argumenty to zmienne
+        try {
+            Symbol symbol1 = symbolTable.findSymbol(value1);
+            Symbol symbol2 = symbolTable.findSymbol(value2);
+            if(symbol1.type=="variable"&&symbol2.type=="variable"){
+                
+                commands.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
+                commands.push_back("JPOS 5\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 6\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("SUB " + std::to_string(symbol1.memoryAddress) + "\n");
+                commands.push_back("STORE 1\n");
+
+                commands.push_back("SET 0\n");
+                commands.push_back("STORE 3\n");
+
+                commands.push_back("LOAD " + std::to_string(symbol2.memoryAddress) + "\n");
+                
+                commands.push_back("JZERO "+ std::to_string(64) + "\n");
+
+                commands.push_back("JPOS 5\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 7\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
+                commands.push_back("STORE 2\n");
+                commands.push_back("STORE 8\n");
+
+                mod_pos();
+                
+                }
+            else if(symbol1.type=="array"&&symbol2.type=="array"){
+                
+                load_array( array_index, n-2 ,1,symbol1.range,symbol1.memoryAddress,symbolTable);
+                commands.push_back("JPOS 8\n");
+                commands.push_back("STORE 5\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("SUB 5\n");
+                commands.push_back("STORE 1\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 6\n");
+                commands.push_back("JUMP 2\n");
+                commands.push_back("STORE 1\n");
+
+                commands.push_back("SET 0\n");
+                commands.push_back("STORE 3\n");
+
+                load_array( array_index, n-1 ,2,symbol2.range,symbol2.memoryAddress,symbolTable);
+                
+
+                commands.push_back("JZERO "+ std::to_string(67) + "\n");
+                commands.push_back("JPOS 9\n");
+                commands.push_back("STORE 5\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("SUB 5\n");
+                commands.push_back("STORE 2\n");
+                commands.push_back("STORE 8\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 7\n");
+                commands.push_back("JUMP 3\n");                
+                commands.push_back("STORE 2\n");
+                commands.push_back("STORE 8\n");
+                
+                div_pos();
+               
+            }
+            else if(symbol1.type=="variable"&&symbol2.type=="array"){
+           
+                commands.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
+                commands.push_back("JPOS 5\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 6\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("SUB " + std::to_string(symbol1.memoryAddress) + "\n");
+                commands.push_back("STORE 1\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("STORE 3\n");
+                
+                load_array( array_index, n-1 ,2,symbol2.range,symbol2.memoryAddress,symbolTable);
+
+                commands.push_back("JZERO "+ std::to_string(67) + "\n");
+                commands.push_back("JPOS 9\n");
+                commands.push_back("STORE 5\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("SUB 5\n");
+                commands.push_back("STORE 2\n");
+                commands.push_back("STORE 8\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 7\n");
+                commands.push_back("JUMP 3\n");                
+                commands.push_back("STORE 2\n");
+                commands.push_back("STORE 8\n");
+
+                mod_pos();
+                
+            }
+            else if(symbol1.type=="array"&&symbol2.type=="variable"){
+
+                load_array( array_index, n-2 ,1,symbol1.range,symbol1.memoryAddress,symbolTable);
+                commands.push_back("JPOS 8\n");
+                commands.push_back("STORE 5\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("SUB 5\n");
+                commands.push_back("STORE 1\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 6\n");
+                commands.push_back("JUMP 2\n");
+                commands.push_back("STORE 1\n");
+
+                commands.push_back("SET 0\n");
+                commands.push_back("STORE 3\n");
+
+                commands.push_back("LOAD " + std::to_string(symbol2.memoryAddress) + "\n");
+                commands.push_back("JZERO "+ std::to_string(64) + "\n");
+                commands.push_back("JPOS 5\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 7\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
+                commands.push_back("STORE 2\n");
+                commands.push_back("STORE 8\n");
+
+                mod_pos();
                 
             }
         } catch (const std::runtime_error& e) {
@@ -1392,7 +1715,6 @@ void mul_pos() {
 
 void div_pos() {
     
-
     commands.push_back("LOAD 1\n");
     commands.push_back("STORE 4\n");
 
@@ -1459,9 +1781,84 @@ void div_pos() {
     commands.push_back("STORE 6\n");
 
     commands.push_back("LOAD 3\n");
+}
+void mod_pos() {
+    
+    commands.push_back("LOAD 1\n");
+    commands.push_back("STORE 4\n");
 
+    commands.push_back("SET 1\n");
+    commands.push_back("STORE 5\n");
 
+    commands.push_back("LOAD 2\n");
+    commands.push_back("ADD 2\n");
+    commands.push_back("STORE 2\n");
+    commands.push_back("LOAD 5\n");
+    commands.push_back("ADD 5\n");
+    commands.push_back("STORE 5\n");
+    commands.push_back("LOAD 2\n");
+    commands.push_back("SUB 1\n");
+    commands.push_back("JPOS 2\n");
+    commands.push_back("JUMP -9\n");
 
+    commands.push_back("LOAD 2\n");
+    commands.push_back("HALF\n");
+    commands.push_back("STORE 2\n");
+    commands.push_back("LOAD 5\n");
+    commands.push_back("HALF\n");
+    commands.push_back("STORE 5\n");
+
+    commands.push_back("LOAD 5\n");
+    commands.push_back("JZERO 15\n");
+
+    commands.push_back("LOAD 4\n");
+    commands.push_back("SUB 2\n");
+    commands.push_back("JNEG 5\n");
+    commands.push_back("STORE 4\n");
+
+    commands.push_back("LOAD 3\n");
+    commands.push_back("ADD 5\n");
+    commands.push_back("STORE 3\n");
+
+    commands.push_back("LOAD 2\n");
+    commands.push_back("HALF\n");
+    commands.push_back("STORE 2\n");
+    commands.push_back("LOAD 5\n");
+    commands.push_back("HALF\n");
+    commands.push_back("STORE 5\n");
+    commands.push_back("JUMP -15\n");
+
+    commands.push_back("LOAD 6\n");
+    commands.push_back("JZERO 14\n");
+    commands.push_back("LOAD 7\n");
+    commands.push_back("JZERO 5\n");
+    commands.push_back("SET 0\n"); //oba ujemne
+    commands.push_back("SUB 4\n");
+    commands.push_back("STORE 4\n");
+    commands.push_back("JUMP 13\n");
+    
+    commands.push_back("LOAD 4\n"); //dzielnik dodatni
+    commands.push_back("SUB 8\n");
+    commands.push_back("STORE 8\n");
+    commands.push_back("SET 0\n");
+    commands.push_back("SUB 8\n");
+    commands.push_back("STORE 4\n");
+    commands.push_back("JUMP 6\n");
+
+    commands.push_back("LOAD 7\n");
+    commands.push_back("JZERO 4\n");
+    commands.push_back("LOAD 4\n"); //dzielnik ujemny dzielna dodatnia 
+    commands.push_back("SUB 8\n");
+    commands.push_back("STORE 4\n");
+
+    commands.push_back("SET 0\n");
+    commands.push_back("STORE 1\n");
+    commands.push_back("STORE 2\n");
+    commands.push_back("STORE 3\n");
+    commands.push_back("STORE 5\n");
+    commands.push_back("STORE 6\n");
+
+    commands.push_back("LOAD 4\n");
 }
 void STORE7(std::vector<std::string>& result) {
    

@@ -40,8 +40,11 @@ void add(const std::string& value1, const std::string& value2,std::vector<std::s
 void sub(const std::string& value1, const std::string& value2,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
 void mul(const std::string& value1, const std::string& value2,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
 void div(const std::string& value1, const std::string& value2,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
+void mod(const std::string& value1, const std::string& value2,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
+
 void mul_pos();
 void div_pos();
+void mod_pos();
 
 void end();
 void rtn();

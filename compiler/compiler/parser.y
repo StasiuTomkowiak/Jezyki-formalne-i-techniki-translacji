@@ -221,7 +221,7 @@ expression   : value             {value_e(*($1), array_index,symbolTable);}
              | value SUB value   {sub(*($1), *($3), array_index, symbolTable);}
              | value MUL value   {mul(*($1), *($3), array_index, symbolTable);}
              | value DIV value   {div(*($1), *($3), array_index, symbolTable);}
-             | value MOD value
+             | value MOD value  {mod(*($1), *($3), array_index, symbolTable);}
 ;
 condition    : value EQ value     {$$ = new std::vector<std::string>{*($1), *($3), "EQ"} ;}
              | value NEQ value    {$$ = new std::vector<std::string>{*($1), *($3), "NEQ"} ;}
@@ -266,6 +266,6 @@ int main(int argc, char* argv[]) {
 }
 
 int yyerror(const char* err) {
-    std::cerr << "Error: " << err << " at line " << yylineno -1<< std::endl;
+    std::cerr << "Error: " << err << " at line " << yylineno << std::endl;
     return 1;
 }
