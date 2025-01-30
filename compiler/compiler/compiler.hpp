@@ -23,8 +23,8 @@ void if_then(const std::vector<std::string>& condition,int n,std::vector<std::st
 void while_do(const std::vector<std::string>& condition,int n,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
 void if_then_else(const std::vector<std::string>& condition,int first,int second,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
 void repeat_until(const std::vector<std::string>& condition,int n,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
-void for_to(const std::string& identifier,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
-void for_downto(const std::string& identifier,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
+void for_to(const std::string& identifier,const std::string& value,const std::string& value2,int cmd,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
+void for_downto(const std::string& identifier,const std::string& value,const std::string& value2,int cmd,std::vector<std::string>& array_index,const SymbolTable& symbolTable);
 void read(const std::string& identifier,std::vector<std::string>& array_index, SymbolTable& symbolTable);
 void write(const std::string& value,std::vector<std::string>& array_index, const SymbolTable& symbolTable);
 

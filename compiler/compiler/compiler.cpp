@@ -266,21 +266,132 @@ void if_then_else(const std::vector<std::string>& condition,int first,int second
     }
 }
 
-void for_to(const std::string& identifier,std::vector<std::string>& array_index,const SymbolTable& symbolTable){
- 
-    Symbol symbol1 = symbolTable.findSymbol(identifier);
-    add(identifier,"1",array_index,symbolTable);
-   
-    commands.push_back("STORE " +std::to_string(symbol1.memoryAddress)  + "\n");
+void for_to(const std::string& identifier,const std::string& value,const std::string& value2,int cmd,std::vector<std::string>& array_index,const SymbolTable& symbolTable){
+                std::vector<std::string> helper;
+                commands.push_back("SET 1\n");
+                commands.push_back("ADD " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                helper.assign(commands.end() - cmd-3, commands.end());
+                commands.erase(commands.end() - cmd-3 ,commands.end());
+
+                if(isNumber(value)&&isNumber(value2)){
+                commands.push_back("SET " + value +"\n");
+                commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                commands.push_back("SET " + value2 +"\n");
+                commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n"); 
+                }
+                else if(isNumber(value)&&symbolTable.symbolExist(value2)){
+                    commands.push_back("SET " + value +"\n");
+                    commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                    if(symbolTable.findSymbol(value2).type=="variable"){
+                        commands.push_back("LOAD " +  std::to_string(symbolTable.findSymbol(value2).memoryAddress)+"\n");
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value2).type=="array"){
+                        load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(value2).range,symbolTable.findSymbol(value2).memoryAddress,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }
+                }
+                else if(symbolTable.symbolExist(value)&&isNumber(value2)){
+                    if(symbolTable.findSymbol(value).type=="variable"){
+                    commands.push_back("LOAD " +  std::to_string(symbolTable.findSymbol(value).memoryAddress)+"\n");
+                    commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value).type=="array"){ 
+                        load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(value).range,symbolTable.findSymbol(value).memoryAddress,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                    }
+                    commands.push_back("SET " + value2 +"\n");
+                    commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                }
+                else if(symbolTable.symbolExist(value)&&symbolTable.symbolExist(value2)){
+                    if(symbolTable.findSymbol(value).type=="variable"){
+                    commands.push_back("LOAD " +  std::to_string(symbolTable.findSymbol(value).memoryAddress)+"\n");
+                    commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value).type=="array"){ 
+                        load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(value).range,symbolTable.findSymbol(value).memoryAddress,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                        commands.push_back("SET 0\n");
+                    }
+                    if(symbolTable.findSymbol(value2).type=="variable"){
+                        commands.push_back("LOAD " +  std::to_string(symbolTable.findSymbol(value2).memoryAddress)+"\n");
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value2).type=="array"){  
+                        load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(value2).range,symbolTable.findSymbol(value2).memoryAddress,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }
+                }else{
+                throw std::runtime_error("WRONG values in for declaeration.");
+                }
+                std::vector<std::string> temp3;
+                temp3.push_back(identifier);
+                temp3.push_back(identifier+"n");
+                temp3.push_back("LEQ");
+                commands.insert(commands.end(),helper.begin(),helper.end());
+                while_do(temp3,cmd+3,array_index,symbolTable);
  
 }
 
-void for_downto(const std::string& identifier,std::vector<std::string>& array_index,const SymbolTable& symbolTable){
+void for_downto(const std::string& identifier,const std::string& value,const std::string& value2,int cmd,std::vector<std::string>& array_index,const SymbolTable& symbolTable){
     
-    Symbol symbol1 = symbolTable.findSymbol(identifier);
-    sub(identifier,"1",array_index,symbolTable);
+                std::vector<std::string> helper;
+                commands.push_back("SET -1\n");
+                commands.push_back("ADD " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                helper.assign(commands.end() - cmd-3, commands.end());
+                commands.erase(commands.end() - cmd-3 ,commands.end());
 
-    commands.push_back("STORE " +std::to_string(symbol1.memoryAddress)  + "\n");
+                if(isNumber(value)&&isNumber(value2)){
+                commands.push_back("SET " + value +"\n");
+                commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                commands.push_back("SET " + value2 +"\n");
+                commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n"); 
+                }
+                else if(isNumber(value)&&symbolTable.symbolExist(value2)){
+                    commands.push_back("SET " + value +"\n");
+                    commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                    if(symbolTable.findSymbol(value2).type=="variable"){
+                        commands.push_back("LOAD " +  std::to_string(symbolTable.findSymbol(value2).memoryAddress)+"\n");
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value2).type=="array"){
+                        load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(value2).range,symbolTable.findSymbol(value2).memoryAddress,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }
+                }
+                else if(symbolTable.symbolExist(value)&&isNumber(value2)){
+                    if(symbolTable.findSymbol(value).type=="variable"){
+                    commands.push_back("LOAD " +  std::to_string(symbolTable.findSymbol(value).memoryAddress)+"\n");
+                    commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value).type=="array"){ 
+                        load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(value).range,symbolTable.findSymbol(value).memoryAddress,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                    }
+                    commands.push_back("SET " + value2 +"\n");
+                    commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                }
+                else if(symbolTable.symbolExist(value)&&symbolTable.symbolExist(value2)){
+                    if(symbolTable.findSymbol(value).type=="variable"){
+                    commands.push_back("LOAD " +  std::to_string(symbolTable.findSymbol(value).memoryAddress)+"\n");
+                    commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value).type=="array"){ 
+                        load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(value).range,symbolTable.findSymbol(value).memoryAddress,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                        commands.push_back("SET 0\n");
+                    }
+                    if(symbolTable.findSymbol(value2).type=="variable"){
+                        commands.push_back("LOAD " +  std::to_string(symbolTable.findSymbol(value2).memoryAddress)+"\n");
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value2).type=="array"){  
+                        load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(value2).range,symbolTable.findSymbol(value2).memoryAddress,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }
+                }else{
+                throw std::runtime_error("WRONG values in for declaeration.");
+                }
+                std::vector<std::string> temp3;
+                temp3.push_back(identifier);
+                temp3.push_back(identifier+"n");
+                temp3.push_back("GEQ");
+                commands.insert(commands.end(),helper.begin(),helper.end());
+                while_do(temp3,cmd+3,array_index,symbolTable);
     
    
 }

@@ -77,7 +77,7 @@ procedure:       PROCEDURE proc_head IS _BEGIN commands END
                 ;
 
 main         : PROGRAM IS declarations _BEGIN commands END   {end();}                        
-             | PROGRAM IS _BEGIN commands END                                     
+             | PROGRAM IS _BEGIN commands END                 {end();}                        
 ;
 commands     : commands command                                                
              | command  
@@ -130,8 +130,13 @@ command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,
                 newSymbol1.scopeLevel = symbolTable.currentScope;
                 symbolTable.addSymbol((*$2+"n"), newSymbol1);
             
-             }  TO value DO commands ENDFOR{                
-                
+             }  TO value DO {command_line.push_back(commands.size());} commands {command_line.push_back(commands.size());} ENDFOR{                
+                    for_to(*$2,*$4,*$7, command_line[command_line.size()-1]-command_line[command_line.size()-2],array_index,  symbolTable);
+                    command_line.pop_back();
+                    command_line.pop_back();
+                    symbolTable.removeSymbol(*$2+"n");
+                    symbolTable.removeSymbol(*$2);
+                    symbolTable.nextMemoryAddress=symbolTable.nextMemoryAddress-2;
                 
              }
              | FOR pidentifier  FROM value 
@@ -151,7 +156,15 @@ command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,
                 newSymbol1.scopeLevel = symbolTable.currentScope;
                 symbolTable.addSymbol((*$2+"n"), newSymbol1);
             
-             }DOWNTO value DO commands ENDFOR
+             }DOWNTO value DO {command_line.push_back(commands.size());} commands {command_line.push_back(commands.size());} ENDFOR{
+                for_downto(*$2,*$4,*$7, command_line[command_line.size()-1]-command_line[command_line.size()-2],array_index,  symbolTable);
+                    command_line.pop_back();
+                    command_line.pop_back();
+                    symbolTable.removeSymbol(*$2+"n");
+                    symbolTable.removeSymbol(*$2);
+                    symbolTable.nextMemoryAddress=symbolTable.nextMemoryAddress-2;
+                
+             }
              | proc_call SEMICOLON
              | READ identifier SEMICOLON       {read(*$2,array_index, symbolTable);}             
              | WRITE value SEMICOLON           {write(*$2,array_index, symbolTable);}
