@@ -1970,5 +1970,22 @@ void procedure_call(const std::string& symbol,std::vector<int>& procedure_size,c
     commands.push_back("STORE 9\n");
     n=n-procedure_size[symbol1.scopeLevel]+2;
     commands.push_back("JUMP "+to_string(-n)+"\n");
+}
+void procedure_store_pointer(const std::string& symbol,std::vector<string>& arguments ,SymbolTable& symbolTable){
+
+    Symbol symbol1=symbolTable.findProcedure(symbol);
+
+    std::vector<int> memory_address;
+    int scope=symbol1.scopeLevel;
+    for(int i=0;i<arguments.size();i++){
+        Symbol symbol2=symbolTable.findSymbol(arguments[i]);
+        memory_address.push_back(symbol2.memoryAddress);
+    }
+    symbolTable.currentScope=symbol1.scopeLevel;
+    for(int i=0;i<arguments.size();i++){
+        commands.push_back("SET  "+to_string(memory_address[i])+"\n");
+        commands.push_back("STORE "+to_string(symbol1.memoryAddress+i+1)+"\n");
+    }
+
 
 }

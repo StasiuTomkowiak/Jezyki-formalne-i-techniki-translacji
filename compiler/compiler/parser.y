@@ -20,7 +20,9 @@ std::vector<std::string> commands;
 std::vector<std::string> array_index;
 std::vector<int> command_line;
 std::vector<int> procedure_size;
+std::vector<std::string> arguments;
 
+ int main_scope;
 
 bool e=false;
 
@@ -65,6 +67,8 @@ bool e=false;
 
 program_all  : {commands.push_back("jump");procedure_size.push_back(1);}procedures{
     jump();
+    main_scope=symbolTable.currentScope;
+   
 } main  {
     
 }
@@ -178,7 +182,10 @@ command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,
                     symbolTable.nextMemoryAddress=symbolTable.nextMemoryAddress-2;
                 
              }
-             | proc_call SEMICOLON              {procedure_call(*$1,procedure_size, symbolTable);}
+             | proc_call SEMICOLON              {
+                procedure_call(*$1,procedure_size, symbolTable);
+                 symbolTable.currentScope=main_scope;
+             }
              | READ identifier SEMICOLON       {read(*$2,array_index, symbolTable);}             
              | WRITE value SEMICOLON           {write(*$2,array_index, symbolTable);}
 ;
@@ -193,7 +200,13 @@ proc_head    : pidentifier {
     
                 LPRNT args_decl RPRNT
 ;
-proc_call    : pidentifier LPRNT args RPRNT{$$=$1;}
+proc_call    : pidentifier LPRNT args RPRNT{
+                //funkcja przypiisujaca wartosci wskaznikow
+                procedure_store_pointer(*$1, arguments , symbolTable);
+                arguments.erase(arguments.begin() , arguments.end());  
+
+                $$=$1;
+                }
 ;
 declarations : declarations  COMMA pidentifier {
                 Symbol newSymbol;
@@ -251,8 +264,10 @@ args_decl    : args_decl  COMMA pidentifier
              | TABLE pidentifier
 
 ;
-args         : args  COMMA pidentifier
-             | pidentifier
+args         : args  COMMA pidentifier{arguments.push_back(*$3);
+
+}
+             | pidentifier {arguments.push_back(*$1);}
 ;
 expression   : value             {value_e(*($1), array_index,symbolTable);}  
              | value ADD value   {add(*($1), *($3), array_index,symbolTable);}

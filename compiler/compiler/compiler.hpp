@@ -60,6 +60,7 @@ void end();
 void rtn();
 void jump();
 void procedure_call(const std::string& symbol,std::vector<int>& procedure_size,const SymbolTable& symbolTable);
+void procedure_store_pointer(const std::string& symbol,std::vector<string>& arguments ,SymbolTable& symbolTable);
 
 
 std::vector<std::string>* merge(const std::vector<std::string>& vec1, const std::vector<std::string>& vec2);

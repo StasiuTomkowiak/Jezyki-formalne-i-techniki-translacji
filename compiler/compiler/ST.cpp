@@ -47,6 +47,7 @@ Symbol SymbolTable::findSymbol(const std::string& name) const {
     }
     return it->second;
 }
+
 Symbol SymbolTable::findProcedure(const std::string& name) const {
     auto it = table.find(name);
     if (it == table.end()) {
