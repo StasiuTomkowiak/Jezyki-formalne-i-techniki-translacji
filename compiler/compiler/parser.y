@@ -20,9 +20,7 @@ std::vector<std::string> commands;
 std::vector<std::string> array_index;
 std::vector<int> command_line;
 
-int while_line=0;
-int while_line1=0;
-int while_line2=0;
+
 bool e=false;
 
 
@@ -62,7 +60,9 @@ bool e=false;
 
 %%
 
-program_all  : procedures main  {
+program_all  : procedures{
+    jump();
+} main  {
     
 }
 ;
@@ -71,9 +71,12 @@ procedures   :  procedures procedure
 ;
 procedure:       PROCEDURE proc_head IS _BEGIN commands END 
                 {
-                
+                rtn();
+                symbolTable.currentScope++;                }
+                |PROCEDURE proc_head IS declarations _BEGIN commands END {
+                    rtn();
+                symbolTable.currentScope++;
                 }
-                |PROCEDURE proc_head IS declarations _BEGIN commands END 
                 ;
 
 main         : PROGRAM IS declarations _BEGIN commands END   {end();}                        
@@ -169,7 +172,16 @@ command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,
              | READ identifier SEMICOLON       {read(*$2,array_index, symbolTable);}             
              | WRITE value SEMICOLON           {write(*$2,array_index, symbolTable);}
 ;
-proc_head    : pidentifier LPRNT args_decl RPRNT
+proc_head    : pidentifier {
+                Symbol newSymbol;
+                newSymbol.name = *$1;
+                newSymbol.type = "procedure";
+                newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
+                newSymbol.scopeLevel = symbolTable.currentScope;
+                symbolTable.addSymbol(*$1, newSymbol);
+                }
+    
+                LPRNT args_decl RPRNT
 ;
 proc_call    : pidentifier LPRNT args RPRNT
 ;
@@ -208,8 +220,24 @@ declarations : declarations  COMMA pidentifier {
                 symbolTable.addArray(*$1, newSymbol);}
 ;
 args_decl    : args_decl  COMMA pidentifier
+                {
+                Symbol newSymbol;
+                newSymbol.name = *$3;
+                newSymbol.type = "pointer";
+                newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
+                newSymbol.scopeLevel = symbolTable.currentScope;
+                symbolTable.addSymbol(*$3, newSymbol);
+                }
              | args_decl COMMA TABLE pidentifier
              | pidentifier
+                {
+                Symbol newSymbol;
+                newSymbol.name = *$1;
+                newSymbol.type = "pointer";
+                newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
+                newSymbol.scopeLevel = symbolTable.currentScope;
+                symbolTable.addSymbol(*$1, newSymbol);
+                }
              | TABLE pidentifier
 
 ;

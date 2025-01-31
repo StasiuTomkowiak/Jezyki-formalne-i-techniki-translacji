@@ -46,8 +46,20 @@ void mul_pos();
 void div_pos();
 void mod_pos();
 
+void load_variable(const std::string& value1,const SymbolTable& symbolTable);
+void add_variable(const std::string& value1,const SymbolTable& symbolTable);
+void sub_variable(const std::string& value1,const SymbolTable& symbolTable);
+
+void load_pointer(const std::string& value1,const SymbolTable& symbolTable);
+void add_point(const std::string& value1,const SymbolTable& symbolTable);
+void sub_point(const std::string& value1,const SymbolTable& symbolTable);
+void store_pointer(const std::string& value1,const SymbolTable& symbolTable);
+
+
 void end();
 void rtn();
+void jump();
+
 
 std::vector<std::string>* merge(const std::vector<std::string>& vec1, const std::vector<std::string>& vec2);
 
