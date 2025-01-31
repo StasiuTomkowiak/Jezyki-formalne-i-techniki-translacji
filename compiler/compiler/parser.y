@@ -19,6 +19,7 @@ std::vector<std::string> all;
 std::vector<std::string> commands;
 std::vector<std::string> array_index;
 std::vector<int> command_line;
+std::vector<int> procedure_size;
 
 
 bool e=false;
@@ -46,6 +47,8 @@ bool e=false;
 %token ADD SUB MUL DIV MOD
 %token ERROR 
 %type <pidentifier> identifier 
+%type <pidentifier> proc_call
+
 %token <pidentifier> pidentifier 
 %token <num> num
 %type  <num> minnum
@@ -60,7 +63,7 @@ bool e=false;
 
 %%
 
-program_all  : procedures{
+program_all  : {commands.push_back("jump");procedure_size.push_back(1);}procedures{
     jump();
 } main  {
     
@@ -71,11 +74,18 @@ procedures   :  procedures procedure
 ;
 procedure:       PROCEDURE proc_head IS _BEGIN commands END 
                 {
-                rtn();
-                symbolTable.currentScope++;                }
+                    rtn();
+                    symbolTable.currentScope++;
+                    procedure_size.push_back(commands.size());
+                    for(int i=0;i<procedure_size.size();i++)
+                    std::cout<<procedure_size[i]<<std::endl;                
+                }
                 |PROCEDURE proc_head IS declarations _BEGIN commands END {
                     rtn();
-                symbolTable.currentScope++;
+                    symbolTable.currentScope++;
+                    procedure_size.push_back(commands.size());
+                    for(int i=0;i<procedure_size.size();i++)
+                    std::cout<<procedure_size[i]<<std::endl;
                 }
                 ;
 
@@ -168,7 +178,7 @@ command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,
                     symbolTable.nextMemoryAddress=symbolTable.nextMemoryAddress-2;
                 
              }
-             | proc_call SEMICOLON
+             | proc_call SEMICOLON              {procedure_call(*$1,procedure_size, symbolTable);}
              | READ identifier SEMICOLON       {read(*$2,array_index, symbolTable);}             
              | WRITE value SEMICOLON           {write(*$2,array_index, symbolTable);}
 ;
@@ -183,7 +193,7 @@ proc_head    : pidentifier {
     
                 LPRNT args_decl RPRNT
 ;
-proc_call    : pidentifier LPRNT args RPRNT
+proc_call    : pidentifier LPRNT args RPRNT{$$=$1;}
 ;
 declarations : declarations  COMMA pidentifier {
                 Symbol newSymbol;

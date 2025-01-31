@@ -47,7 +47,7 @@ void write(const std::string& value,std::vector<std::string>& array_index, const
             else if (symbol.type == "array") {
                 write_array( array_index, n-1 ,1,symbol.range,symbol.memoryAddress,symbolTable);
                 
-            }else if (symbol.type == "array") {
+            }else if (symbol.type == "pointer") {
                 load_pointer(value,symbolTable);
                 commands.push_back("PUT 0\n");
             }
@@ -1554,7 +1554,7 @@ void end()
 void rtn()
 {
    
-    commands.push_back("RTRN 7\n");
+    commands.push_back("RTRN 9\n");
   
 }
 
@@ -1953,9 +1953,22 @@ void store_pointer(const std::string& value1,const SymbolTable& symbolTable){
 
 void jump(){
     int n=commands.size();
+    if(n>1){
     std::vector<std::string> helper;
-    helper.assign(commands.begin() , commands.end());
+    helper.assign(commands.begin()+1 , commands.end());
     commands.erase(commands.begin() , commands.end());
-    commands.push_back("JUMP "+to_string(n+1)+"\n");
+    commands.push_back("JUMP "+to_string(n)+"\n");
     commands.insert(commands.end(),helper.begin(),helper.end());
+    }else 
+    commands.pop_back();
+}
+void procedure_call(const std::string& symbol,std::vector<int>& procedure_size,const SymbolTable& symbolTable){
+    int n=commands.size();
+    Symbol symbol1=symbolTable.findProcedure(symbol);
+    
+    commands.push_back("SET  "+to_string(n+3)+"\n");
+    commands.push_back("STORE 9\n");
+    n=n-procedure_size[symbol1.scopeLevel]+2;
+    commands.push_back("JUMP "+to_string(-n)+"\n");
+
 }

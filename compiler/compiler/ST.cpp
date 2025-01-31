@@ -47,6 +47,14 @@ Symbol SymbolTable::findSymbol(const std::string& name) const {
     }
     return it->second;
 }
+Symbol SymbolTable::findProcedure(const std::string& name) const {
+    auto it = table.find(name);
+    if (it == table.end()) {
+        throw std::runtime_error("Symbol not found or out of scope: " + name);
+    }
+    return it->second;
+}
+
 bool SymbolTable::symbolExist(const std::string& name) const {
     auto it = table.find(name);
     if (it == table.end() || it->second.scopeLevel > currentScope||it->second.scopeLevel < currentScope) {
@@ -91,7 +99,9 @@ void SymbolTable::enterScope() {
 void SymbolTable::exitScope() {
     --currentScope;
 }
-
+void SymbolTable::ChangeScope(int n) {
+    currentScope=n;
+}
 // Debugowanie: Wyświetlanie zawartości tablicy symboli
 void SymbolTable::debugPrint() const {
     for (const auto& entry : table) {
