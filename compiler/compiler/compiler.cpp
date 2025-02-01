@@ -466,7 +466,6 @@ void for_downto(const std::string& identifier,const std::string& value,const std
    
 }
 
-
 void add(const std::string& value1, const std::string& value2, std::vector<std::string>& array_index,const SymbolTable& symbolTable) {
     int n=array_index.size();
     if (isNumber(value1) && isNumber(value2)) {
@@ -1035,8 +1034,7 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
                 commands.push_back("STORE 2\n");
                 commands.push_back("SET 0\n");
                 commands.push_back("STORE 3\n");
-
-                 div_pos();
+                div_pos();
                
         } 
 
@@ -1058,29 +1056,20 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
                 }
                 commands.push_back("SET " + modified + "\n");
                 commands.push_back("STORE 1\n");
-                commands.push_back("SET 0\n");
-                commands.push_back("STORE 3\n");
                 commands.push_back("LOAD " + std::to_string(symbol2.memoryAddress) + "\n");
                 
-
-                commands.push_back("JZERO "+ std::to_string(55) + "\n");
+                commands.push_back("JZERO "+ std::to_string(57) + "\n");
                 commands.push_back("JPOS 6\n");
                 commands.push_back("SET 1\n");
                 commands.push_back("SUB 6\n");
                 commands.push_back("STORE 6\n");
                 commands.push_back("SET 0\n");
                 commands.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
-                commands.push_back("STORE 2\n");
-                div_pos();
-                
-                
-               
-        }   
-            else if(symbol2.type=="array"){       
-             
+                commands.push_back("STORE 2\n");  
                 commands.push_back("SET 0\n");
                 commands.push_back("STORE 3\n");
-
+                div_pos();
+            }else if(symbol2.type=="array"){       
                 commands.push_back("SET " + value1 + "\n");
                 commands.push_back("JPOS 4\n");
                 commands.push_back("SET 1\n");
@@ -1093,9 +1082,7 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
                 commands.push_back("STORE 1\n");
                 
                 load_array( array_index, n-1 ,2,symbol2.range,symbol2.memoryAddress,symbolTable);  
-                
-
-                commands.push_back("JZERO "+ std::to_string(58) + "\n");
+                commands.push_back("JZERO "+ std::to_string(60) + "\n");
                 commands.push_back("JPOS 9\n");
                 commands.push_back("STORE 5\n");
                 commands.push_back("SET 0\n");
@@ -1106,8 +1093,61 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
                 commands.push_back("STORE 6\n");
                 commands.push_back("JUMP 2\n");                
                 commands.push_back("STORE 2\n");
-                div_pos();
-                               
+                commands.push_back("SET 0\n");
+                commands.push_back("STORE 3\n");
+                div_pos();             
+            }else if(symbol2.type=="pointer"){
+                 
+                commands.push_back("SET " + value1 + "\n");
+                commands.push_back("JPOS 4\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 6\n");
+                std::string modified = std::string(value1.c_str() + 1);
+                if(modified==""){
+                        modified="0";
+                }
+                commands.push_back("SET " + modified + "\n");
+                commands.push_back("STORE 1\n");
+                load_pointer(value2,symbolTable);
+                
+                commands.push_back("JZERO "+ std::to_string(57) + "\n");
+                commands.push_back("JPOS 6\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("SUB 6\n");
+                commands.push_back("STORE 6\n");
+                commands.push_back("SET 0\n");
+                sub_point(value2,symbolTable);
+                commands.push_back("STORE 2\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("STORE 3\n");
+                div_pos();  
+            }else if(symbol2.type=="pointer_array"){       
+                commands.push_back("SET " + value1 + "\n");
+                commands.push_back("JPOS 4\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 6\n");
+                std::string modified = std::string(value1.c_str() + 1);
+                if(modified==""){
+                        modified="0";
+                }
+                commands.push_back("SET " + modified + "\n");
+                commands.push_back("STORE 1\n");
+                
+                load_array_pointer( array_index, n-1 ,2,value2,symbolTable);  
+                commands.push_back("JZERO "+ std::to_string(60) + "\n");
+                commands.push_back("JPOS 9\n");
+                commands.push_back("STORE 5\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("SUB 5\n");
+                commands.push_back("STORE 2\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("SUB 6\n");
+                commands.push_back("STORE 6\n");
+                commands.push_back("JUMP 2\n");                
+                commands.push_back("STORE 2\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("STORE 3\n");
+                div_pos();             
         }
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in DIV: " << e.what() << "\n";
@@ -1129,6 +1169,13 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
                 else if(symbol1.type=="array"){
                     load_array( array_index, n-2 ,1,symbol1.range,symbol1.memoryAddress,symbolTable);
                     commands.push_back("HALF\n");
+                }else if(symbol1.type=="pointer"){
+                    load_pointer(value1,symbolTable);
+                    commands.push_back("HALF\n");
+                }
+                else if(symbol1.type=="pointer_array"){
+                    load_array_pointer( array_index, n-2 ,1,value1,symbolTable);
+                    commands.push_back("HALF\n");
                 }
             }
             else if(symbol1.type=="variable"){
@@ -1143,9 +1190,6 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
                 commands.push_back("SET " + modified + "\n");
                 commands.push_back("STORE 2\n");
 
-                commands.push_back("SET 0\n");
-                commands.push_back("STORE 3\n");
-
                 commands.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
                 commands.push_back("JPOS 6\n");
                 commands.push_back("SET 1\n");
@@ -1154,12 +1198,11 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
                 commands.push_back("SET 0\n");
                 commands.push_back("SUB " + std::to_string(symbol1.memoryAddress) + "\n");
                 commands.push_back("STORE 1\n");
-
+                commands.push_back("SET 0\n");
+                commands.push_back("STORE 3\n");
                 div_pos();
-               
             }
             else if(symbol1.type=="array"){
-                 
                 commands.push_back("SET " + value2 + "\n");
                 commands.push_back("JPOS 4\n");
                 commands.push_back("SET 1\n");
@@ -1186,10 +1229,59 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
 
                 commands.push_back("SET 0\n");
                 commands.push_back("STORE 3\n");
+                div_pos();
+        }else if(symbol1.type=="pointer"){
+                commands.push_back("SET " + value2 + "\n");
+                commands.push_back("JPOS 4\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 6\n");
+                std::string modified = std::string(value2.c_str() + 1);
+                if(modified==""){
+                        modified="0";
+                }
+                commands.push_back("SET " + modified + "\n");
+                commands.push_back("STORE 2\n");
 
-                 div_pos();
-                 
-      
+                load_pointer(value1,symbolTable);
+                commands.push_back("JPOS 6\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("SUB 6\n");
+                commands.push_back("STORE 6\n");
+                commands.push_back("SET 0\n");
+                sub_point(value1,symbolTable);
+                commands.push_back("STORE 1\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("STORE 3\n");
+                div_pos();
+            }
+            else if(symbol1.type=="pointer_array"){
+                commands.push_back("SET " + value2 + "\n");
+                commands.push_back("JPOS 4\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("STORE 6\n");
+                std::string modified = std::string(value2.c_str() + 1);
+                if(modified==""){
+                        modified="0";
+                }
+                commands.push_back("SET " + modified + "\n");
+                commands.push_back("STORE 2\n");
+
+                load_array_pointer( array_index, n-2 ,1,value1,symbolTable);
+               
+                commands.push_back("JPOS 9\n");
+                commands.push_back("STORE 5\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("SUB 5\n");
+                commands.push_back("STORE 1\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("SUB 6\n");
+                commands.push_back("STORE 6\n");
+                commands.push_back("JUMP 2\n");                
+                commands.push_back("STORE 1\n");
+
+                commands.push_back("SET 0\n");
+                commands.push_back("STORE 3\n");
+                div_pos();
         }
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in DIV: " << e.what() << "\n";
@@ -1200,35 +1292,16 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
         try {
             Symbol symbol1 = symbolTable.findSymbol(value1);
             Symbol symbol2 = symbolTable.findSymbol(value2);
-            if(symbol1.type=="variable"&&symbol2.type=="variable"){
-                
+            if(symbol1.type=="variable"){
                 commands.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
                 commands.push_back("JPOS 5\n");
                 commands.push_back("SET 1\n");
                 commands.push_back("STORE 6\n");
                 commands.push_back("SET 0\n");
                 commands.push_back("SUB " + std::to_string(symbol1.memoryAddress) + "\n");
-                commands.push_back("STORE 1\n");
-
-                commands.push_back("SET 0\n");
-                commands.push_back("STORE 3\n");
-
-                commands.push_back("LOAD " + std::to_string(symbol2.memoryAddress) + "\n");
-                
-                commands.push_back("JZERO "+ std::to_string(55) + "\n");
-
-                commands.push_back("JPOS 6\n");
-                commands.push_back("SET 1\n");
-                commands.push_back("SUB 6\n");
-                commands.push_back("STORE 6\n");
-                commands.push_back("SET 0\n");
-                commands.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
-                commands.push_back("STORE 2\n");
-                div_pos();
-                
+                commands.push_back("STORE 1\n");       
                 }
-            else if(symbol1.type=="array"&&symbol2.type=="array"){
-                
+            else if(symbol1.type=="array"){ 
                 load_array( array_index, n-2 ,1,symbol1.range,symbol1.memoryAddress,symbolTable);
                 commands.push_back("JPOS 8\n");
                 commands.push_back("STORE 5\n");
@@ -1239,58 +1312,17 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
                 commands.push_back("STORE 6\n");
                 commands.push_back("JUMP 2\n");
                 commands.push_back("STORE 1\n");
-
-                commands.push_back("SET 0\n");
-                commands.push_back("STORE 3\n");
-
-                load_array( array_index, n-1 ,2,symbol2.range,symbol2.memoryAddress,symbolTable);
-                
-
-                commands.push_back("JZERO "+ std::to_string(58) + "\n");
-                commands.push_back("JPOS 9\n");
-                commands.push_back("STORE 5\n");
-                commands.push_back("SET 0\n");
-                commands.push_back("SUB 5\n");
-                commands.push_back("STORE 2\n");
-                commands.push_back("SET 1\n");
-                commands.push_back("SUB 6\n");
-                commands.push_back("STORE 6\n");
-                commands.push_back("JUMP 2\n");                
-                commands.push_back("STORE 2\n");
-                div_pos();
-               
-            }
-            else if(symbol1.type=="variable"&&symbol2.type=="array"){
-           
-                commands.push_back("LOAD " + std::to_string(symbol1.memoryAddress) + "\n");
+            }else if(symbol1.type=="pointer"){
+                load_pointer(value1,symbolTable);
                 commands.push_back("JPOS 5\n");
                 commands.push_back("SET 1\n");
                 commands.push_back("STORE 6\n");
                 commands.push_back("SET 0\n");
-                commands.push_back("SUB " + std::to_string(symbol1.memoryAddress) + "\n");
-                commands.push_back("STORE 1\n");
-                commands.push_back("SET 0\n");
-                commands.push_back("STORE 3\n");
-                
-                load_array( array_index, n-1 ,2,symbol2.range,symbol2.memoryAddress,symbolTable);
-
-                commands.push_back("JZERO "+ std::to_string(58) + "\n");
-                commands.push_back("JPOS 9\n");
-                commands.push_back("STORE 5\n");
-                commands.push_back("SET 0\n");
-                commands.push_back("SUB 5\n");
-                commands.push_back("STORE 2\n");
-                commands.push_back("SET 1\n");
-                commands.push_back("SUB 6\n");
-                commands.push_back("STORE 6\n");
-                commands.push_back("JUMP 2\n");                
-                commands.push_back("STORE 2\n");
-                div_pos();
-                
-            }
-            else if(symbol1.type=="array"&&symbol2.type=="variable"){
-
-                load_array( array_index, n-2 ,1,symbol1.range,symbol1.memoryAddress,symbolTable);
+                sub_point(value1,symbolTable);
+                commands.push_back("STORE 1\n");       
+                }
+            else if(symbol1.type=="pointer_array"){ 
+                load_array_pointer( array_index, n-2 ,1,value1,symbolTable);
                 commands.push_back("JPOS 8\n");
                 commands.push_back("STORE 5\n");
                 commands.push_back("SET 0\n");
@@ -1300,27 +1332,65 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
                 commands.push_back("STORE 6\n");
                 commands.push_back("JUMP 2\n");
                 commands.push_back("STORE 1\n");
-
+            }
+            if(symbol2.type=="array"){
+                load_array( array_index, n-1 ,2,symbol2.range,symbol2.memoryAddress,symbolTable);
+                commands.push_back("JZERO "+ std::to_string(60) + "\n");
+                commands.push_back("JPOS 9\n");
+                commands.push_back("STORE 5\n");
                 commands.push_back("SET 0\n");
-                commands.push_back("STORE 3\n");
-
+                commands.push_back("SUB 5\n");
+                commands.push_back("STORE 2\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("SUB 6\n");
+                commands.push_back("STORE 6\n");
+                commands.push_back("JUMP 2\n");                
+                commands.push_back("STORE 2\n");     
+            }
+            else if(symbol2.type=="variable"){
                 commands.push_back("LOAD " + std::to_string(symbol2.memoryAddress) + "\n");
-                commands.push_back("JZERO "+ std::to_string(55) + "\n");
+                commands.push_back("JZERO "+ std::to_string(57) + "\n");
                 commands.push_back("JPOS 6\n");
                 commands.push_back("SET 1\n");
                 commands.push_back("SUB 6\n");
                 commands.push_back("STORE 6\n");
                 commands.push_back("SET 0\n");
                 commands.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
+                commands.push_back("STORE 2\n");    
+            }else if(symbol2.type=="pointer_array"){
+                load_array_pointer( array_index, n-1 ,2,value2,symbolTable);
+                commands.push_back("JZERO "+ std::to_string(60) + "\n");
+                commands.push_back("JPOS 9\n");
+                commands.push_back("STORE 5\n");
+                commands.push_back("SET 0\n");
+                commands.push_back("SUB 5\n");
                 commands.push_back("STORE 2\n");
-                div_pos();
-                
+                commands.push_back("SET 1\n");
+                commands.push_back("SUB 6\n");
+                commands.push_back("STORE 6\n");
+                commands.push_back("JUMP 2\n");                
+                commands.push_back("STORE 2\n");     
             }
+            else if(symbol2.type=="pointer"){
+                load_pointer(value2,symbolTable);
+                commands.push_back("JZERO "+ std::to_string(57) + "\n");
+                commands.push_back("JPOS 6\n");
+                commands.push_back("SET 1\n");
+                commands.push_back("SUB 6\n");
+                commands.push_back("STORE 6\n");
+                commands.push_back("SET 0\n");
+                sub_point(value2,symbolTable);
+                commands.push_back("STORE 2\n");    
+            }
+            commands.push_back("SET 0\n");
+            commands.push_back("STORE 3\n");
+            div_pos();
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in DIV: " << e.what() << "\n";
             exit(1);
         }
     }
+   
     array_index.pop_back();
     array_index.pop_back();
  
@@ -1720,7 +1790,6 @@ void sub_variable(const std::string& value1,const SymbolTable& symbolTable){
     Symbol symbol1 = symbolTable.findSymbol(value1);
     commands.push_back("SUB " + to_string(symbol1.memoryAddress)+ "\n");
 }
-
 
 void assign_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress,const SymbolTable& symbolTable) {
     
