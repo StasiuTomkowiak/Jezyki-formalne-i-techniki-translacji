@@ -1571,6 +1571,8 @@ void  value_e(const std::string& value1,std::vector<std::string>& array_index,co
             }
             else if(symbol1.type=="pointer"){
                load_pointer(value1,symbolTable);
+            }else if(symbol1.type=="pointer_array"){
+                load_array_pointer( array_index, n-1 ,2,value1,symbolTable);  
             }
         } catch (const std::runtime_error& e) {
             std::cerr << "Error declared value or variable: " << e.what() << "\n";
@@ -2057,18 +2059,33 @@ void add_array_pointer(const std::vector<std::string>& array, int index ,int sym
         commands.push_back("LOAD 5\n");
         commands.push_back("ADDI " + to_string(sym_num)+ "\n");
 
-    }
-    else if(symbolTable.symbolExist(array[index])){
-        Symbol symbol = symbolTable.findSymbol(array[index]);
-        //int offset=memory_adress-range.first;
-        //commands.push_back("STORE 5\n");
-        ///commands.push_back("SET " + to_string(offset)+ "\n");
-        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
-        //commands.push_back("LOAD " + to_string(symbol.memoryAddress)+ "\n");
-        //commands.push_back("ADD " + to_string(sym_num)+ "\n");
-        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
-        //commands.push_back("LOAD 5\n");
-        //commands.push_back("ADDI " + to_string(sym_num)+ "\n");
+    }else if(symbolTable.symbolExist(array[index])){
+        
+        Symbol zmienna = symbolTable.findSymbol(array[index]);
+        Symbol tablica = symbolTable.findSymbol(value1);
+        if(zmienna.type=="variable"){
+            commands.push_back("STORE 5\n");
+            commands.push_back("LOAD " + to_string(tablica.memoryAddress)+ "\n");
+            commands.push_back("SUB " + to_string(tablica.memoryAddress+1)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOAD " + to_string(zmienna.memoryAddress)+ "\n");
+            commands.push_back("ADD " + to_string(sym_num)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOAD 5\n");
+            commands.push_back("ADDI " + to_string(sym_num)+ "\n");
+
+        }if(zmienna.type=="pointer"){
+            commands.push_back("STORE 5\n");
+            commands.push_back("LOAD " + to_string(tablica.memoryAddress)+ "\n");
+            commands.push_back("SUB " + to_string(tablica.memoryAddress+1)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOADI " + to_string(zmienna.memoryAddress)+ "\n");
+            commands.push_back("ADD " + to_string(sym_num)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOAD 5\n");
+            commands.push_back("ADDI " + to_string(sym_num)+ "\n");
+
+        }
     }
 }
 
@@ -2086,24 +2103,40 @@ void sub_array_pointer(const std::vector<std::string>& array, int index ,int sym
         commands.push_back("SUBI " + to_string(sym_num)+ "\n");
 
     }
-    else if(symbolTable.symbolExist(array[index])){
-        Symbol symbol = symbolTable.findSymbol(array[index]);
-        //int offset=memory_adress-range.first;
-        //commands.push_back("STORE 5\n");
-        ///commands.push_back("SET " + to_string(offset)+ "\n");
-        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
-        //commands.push_back("LOAD " + to_string(symbol.memoryAddress)+ "\n");
-        //commands.push_back("ADD " + to_string(sym_num)+ "\n");
-        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
-        //commands.push_back("LOAD 5\n");
-        //commands.push_back("ADDI " + to_string(sym_num)+ "\n");
-    }
+     else if(symbolTable.symbolExist(array[index])){
+        
+        Symbol zmienna = symbolTable.findSymbol(array[index]);
+        Symbol tablica = symbolTable.findSymbol(value1);
+        if(zmienna.type=="variable"){
+            commands.push_back("STORE 5\n");
+            commands.push_back("LOAD " + to_string(tablica.memoryAddress)+ "\n");
+            commands.push_back("SUB " + to_string(tablica.memoryAddress+1)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOAD " + to_string(zmienna.memoryAddress)+ "\n");
+            commands.push_back("ADD " + to_string(sym_num)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOAD 5\n");
+            commands.push_back("SUBI " + to_string(sym_num)+ "\n");
+
+        }else if(zmienna.type=="pointer"){
+            commands.push_back("STORE 5\n");
+            commands.push_back("LOAD " + to_string(tablica.memoryAddress)+ "\n");
+            commands.push_back("SUB " + to_string(tablica.memoryAddress+1)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOADI " + to_string(zmienna.memoryAddress)+ "\n");
+            commands.push_back("ADD " + to_string(sym_num)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOAD 5\n");
+            commands.push_back("SUBI " + to_string(sym_num)+ "\n");
+
+        }
 }
+}
+
 void load_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable) {
     
 
     if(isNumber(array[index])){
-         if(isNumber(array[index])){
         Symbol symbol = symbolTable.findSymbol(value1);
         commands.push_back("SET " + array[index]+"\n");
         commands.push_back("STORE " + to_string(sym_num)+ "\n");
@@ -2112,24 +2145,35 @@ void load_array_pointer(const std::vector<std::string>& array, int index ,int sy
         commands.push_back("ADD " + to_string(sym_num)+ "\n");
         commands.push_back("STORE " + to_string(sym_num)+ "\n");
         commands.push_back("LOADI " + to_string(sym_num)+ "\n");
-    }
-    }
-    else if(symbolTable.symbolExist(array[index])){
-        Symbol symbol = symbolTable.findSymbol(array[index]);
-        //int offset=memory_adress-range.first;
-        //commands.push_back("SET " + to_string(offset)+ "\n");
-        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
-        //commands.push_back("LOAD " + to_string(symbol.memoryAddress)+ "\n");
-        //commands.push_back("ADD " + to_string(sym_num)+ "\n");
-        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
-        //commands.push_back("LOADI " + to_string(sym_num)+ "\n");
-    }
+    
+    }else if(symbolTable.symbolExist(array[index])){
+        
+        Symbol zmienna = symbolTable.findSymbol(array[index]);
+        Symbol tablica = symbolTable.findSymbol(value1);
+        if(zmienna.type=="variable"){
+            commands.push_back("LOAD " + to_string(tablica.memoryAddress)+ "\n");
+            commands.push_back("SUB " + to_string(tablica.memoryAddress+1)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOAD " + to_string(zmienna.memoryAddress)+ "\n");
+            commands.push_back("ADD " + to_string(sym_num)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOADI " + to_string(sym_num)+ "\n");
+
+        }else if(zmienna.type=="pointer"){
+            commands.push_back("LOAD " + to_string(tablica.memoryAddress)+ "\n");
+            commands.push_back("SUB " + to_string(tablica.memoryAddress+1)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOADI " + to_string(zmienna.memoryAddress)+ "\n");
+            commands.push_back("ADD " + to_string(sym_num)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOADI " + to_string(sym_num)+ "\n");
+
+        }
+}
 }
 void store_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable) {
     
-
     if(isNumber(array[index])){
-         if(isNumber(array[index])){
         Symbol symbol = symbolTable.findSymbol(value1);
         commands.push_back("STORE 5\n");
         commands.push_back("SET " + array[index]+"\n");
@@ -2140,16 +2184,33 @@ void store_array_pointer(const std::vector<std::string>& array, int index ,int s
         commands.push_back("STORE " + to_string(sym_num)+ "\n");
         commands.push_back("LOAD 5\n");
         commands.push_back("STOREI " + to_string(sym_num)+ "\n");
-    }
-    }
-    else if(symbolTable.symbolExist(array[index])){
-        Symbol symbol = symbolTable.findSymbol(array[index]);
-        //int offset=memory_adress-range.first;
-        //commands.push_back("SET " + to_string(offset)+ "\n");
-        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
-        //commands.push_back("LOAD " + to_string(symbol.memoryAddress)+ "\n");
-        //commands.push_back("ADD " + to_string(sym_num)+ "\n");
-        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
-        //commands.push_back("LOADI " + to_string(sym_num)+ "\n");
-    }
+    
+    }else if(symbolTable.symbolExist(array[index])){
+        
+        Symbol zmienna = symbolTable.findSymbol(array[index]);
+        Symbol tablica = symbolTable.findSymbol(value1);
+        if(zmienna.type=="variable"){
+            commands.push_back("STORE 5\n");
+            commands.push_back("LOAD " + to_string(tablica.memoryAddress)+ "\n");
+            commands.push_back("SUB " + to_string(tablica.memoryAddress+1)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOAD " + to_string(zmienna.memoryAddress)+ "\n");
+            commands.push_back("ADD " + to_string(sym_num)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOAD 5\n");
+            commands.push_back("STOREI " + to_string(sym_num)+ "\n");
+
+        }else if(zmienna.type=="pointer"){
+            commands.push_back("STORE 5\n");
+            commands.push_back("LOAD " + to_string(tablica.memoryAddress)+ "\n");
+            commands.push_back("SUB " + to_string(tablica.memoryAddress+1)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOADI " + to_string(zmienna.memoryAddress)+ "\n");
+            commands.push_back("ADD " + to_string(sym_num)+ "\n");
+            commands.push_back("STORE " + to_string(sym_num)+ "\n");
+            commands.push_back("LOAD 5\n");
+            commands.push_back("STOREI " + to_string(sym_num)+ "\n");
+
+        }
+}
 }
