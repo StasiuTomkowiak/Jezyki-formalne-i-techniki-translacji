@@ -188,6 +188,10 @@ command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,
              | WRITE value SEMICOLON           {write(*$2,array_index, symbolTable);}
 ;
 proc_head    : pidentifier {
+                if(symbolTable.ProcedureExist(*$1)){
+                    std::cerr << "Error: Procedure '" << *$1 << "' exists\n";
+                    exit(1); 
+                }
                 Symbol newSymbol;
                 newSymbol.name = *$1;
                 newSymbol.type = "procedure";
@@ -310,7 +314,7 @@ args         : args  COMMA pidentifier{
                 arguments.push_back(*$1);
                 arguments.push_back(std::to_string(symbol.range.first));
                 }}
-                
+
 ;
 expression   : value             {value_e(*($1), array_index,symbolTable);}  
              | value ADD value   {add(*($1), *($3), array_index,symbolTable);}

@@ -63,6 +63,13 @@ bool SymbolTable::symbolExist(const std::string& name) const {
     }
     return true;
 }
+bool SymbolTable::ProcedureExist(const std::string& name)  {
+    auto it = table.find(name);
+    if (it == table.end()) {
+        return false;
+    }
+    return true;
+}
 int SymbolTable::getArrayElementAddress(const std::string& arrayName, int index) const {
     Symbol symbol = findSymbol(arrayName);
 

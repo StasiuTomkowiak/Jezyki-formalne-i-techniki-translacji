@@ -24,9 +24,9 @@ void read(const std::string& identifier, std::vector<std::string>& array_index,S
                 store_array_pointer( array_index, n-1 ,1,identifier,symbolTable);
             }
     } catch (const std::runtime_error& e) {
-        // Jeśli zmienna nie istnieje, zgłoś błąd
+       
         std::cerr << "Error: Variable '" << identifier << "' not declared.\n";
-        exit(1); // Możesz zastąpić bardziej eleganckim zarządzaniem błędami
+        exit(1); 
     }
     array_index.pop_back();
 }
@@ -309,6 +309,12 @@ void for_to(const std::string& identifier,const std::string& value,const std::st
                     }else if(symbolTable.findSymbol(value2).type=="array"){
                         load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(value2).range,symbolTable.findSymbol(value2).memoryAddress,symbolTable);
                         commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value2).type=="pointer"){
+                        load_pointer( value2,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value2).type=="pointer_array"){
+                        load_array_pointer( array_index, array_index.size()-1 ,2,value2,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
                     }
                 }
                 else if(symbolTable.symbolExist(value)&&isNumber(value2)){
@@ -318,6 +324,12 @@ void for_to(const std::string& identifier,const std::string& value,const std::st
                     }else if(symbolTable.findSymbol(value).type=="array"){ 
                         load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(value).range,symbolTable.findSymbol(value).memoryAddress,symbolTable);
                         commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value).type=="pointer"){
+                        load_pointer( value,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value).type=="pointer_array"){
+                        load_array_pointer( array_index, array_index.size()-2 ,2,value,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
                     }
                     commands.push_back("SET " + value2 +"\n");
                     commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
@@ -330,16 +342,29 @@ void for_to(const std::string& identifier,const std::string& value,const std::st
                         load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(value).range,symbolTable.findSymbol(value).memoryAddress,symbolTable);
                         commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
                         commands.push_back("SET 0\n");
+                    }else if(symbolTable.findSymbol(value).type=="pointer"){
+                        load_pointer( value,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value).type=="pointer_array"){
+                        load_array_pointer( array_index, array_index.size()-2 ,2,value,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
                     }
+
                     if(symbolTable.findSymbol(value2).type=="variable"){
                         commands.push_back("LOAD " +  std::to_string(symbolTable.findSymbol(value2).memoryAddress)+"\n");
                         commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
                     }else if(symbolTable.findSymbol(value2).type=="array"){  
                         load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(value2).range,symbolTable.findSymbol(value2).memoryAddress,symbolTable);
                         commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value2).type=="pointer"){
+                        load_pointer( value2,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value2).type=="pointer_array"){
+                        load_array_pointer( array_index, array_index.size()-1 ,2,value2,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
                     }
                 }else{
-                throw std::runtime_error("WRONG values in for declaeration.");
+                throw std::runtime_error("WRONG values in 'for' declaeration.");
                 }
                 std::vector<std::string> temp3;
                 temp3.push_back(identifier);
@@ -374,6 +399,12 @@ void for_downto(const std::string& identifier,const std::string& value,const std
                     }else if(symbolTable.findSymbol(value2).type=="array"){
                         load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(value2).range,symbolTable.findSymbol(value2).memoryAddress,symbolTable);
                         commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value2).type=="pointer"){
+                        load_pointer( value2,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value2).type=="pointer_array"){
+                        load_array_pointer( array_index, array_index.size()-1 ,2,value2,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
                     }
                 }
                 else if(symbolTable.symbolExist(value)&&isNumber(value2)){
@@ -383,6 +414,12 @@ void for_downto(const std::string& identifier,const std::string& value,const std
                     }else if(symbolTable.findSymbol(value).type=="array"){ 
                         load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(value).range,symbolTable.findSymbol(value).memoryAddress,symbolTable);
                         commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value).type=="pointer"){
+                        load_pointer( value,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value).type=="pointer_array"){
+                        load_array_pointer( array_index, array_index.size()-2 ,2,value,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
                     }
                     commands.push_back("SET " + value2 +"\n");
                     commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
@@ -395,16 +432,29 @@ void for_downto(const std::string& identifier,const std::string& value,const std
                         load_array( array_index, array_index.size()-2 ,2,symbolTable.findSymbol(value).range,symbolTable.findSymbol(value).memoryAddress,symbolTable);
                         commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier).memoryAddress)+"\n");
                         commands.push_back("SET 0\n");
+                    }else if(symbolTable.findSymbol(value).type=="pointer"){
+                        load_pointer( value,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value).type=="pointer_array"){
+                        load_array_pointer( array_index, array_index.size()-2 ,2,value,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
                     }
+
                     if(symbolTable.findSymbol(value2).type=="variable"){
                         commands.push_back("LOAD " +  std::to_string(symbolTable.findSymbol(value2).memoryAddress)+"\n");
                         commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
                     }else if(symbolTable.findSymbol(value2).type=="array"){  
                         load_array( array_index, array_index.size()-1 ,2,symbolTable.findSymbol(value2).range,symbolTable.findSymbol(value2).memoryAddress,symbolTable);
                         commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value2).type=="pointer"){
+                        load_pointer( value2,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
+                    }else if(symbolTable.findSymbol(value2).type=="pointer_array"){
+                        load_array_pointer( array_index, array_index.size()-1 ,2,value2,symbolTable);
+                        commands.push_back("STORE " + std::to_string(symbolTable.findSymbol(identifier+"n").memoryAddress)+"\n");
                     }
                 }else{
-                throw std::runtime_error("WRONG values in for declaeration.");
+                throw std::runtime_error("WRONG values in 'for' declaeration.");
                 }
                 std::vector<std::string> temp3;
                 temp3.push_back(identifier);

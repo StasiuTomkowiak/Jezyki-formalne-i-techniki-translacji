@@ -31,6 +31,7 @@ struct SymbolTable {
     void addArray(const std::string& name, const Symbol& symbol);
     Symbol findSymbol(const std::string& name) const;
     Symbol findProcedure(const std::string& name) const;
+    bool ProcedureExist(const std::string& name) ;
 
     int getArrayElementAddress(const std::string& arrayName, int index) const ;
     void removeCurrentScope();
