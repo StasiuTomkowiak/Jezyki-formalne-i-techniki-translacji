@@ -303,9 +303,11 @@ args         : args  COMMA pidentifier{
                 }else if(symbol.type=="array"){
                 arguments.push_back(*$3);
                 arguments.push_back(std::to_string(symbol.range.first));
+                }else if(symbol.type=="pointer_array"){
+                arguments.push_back(*$3);
+                arguments.push_back(std::to_string(symbolTable.findSymbol(*$3).memoryAddress+1));
                 }
-
-}
+            }
              | pidentifier {
                 Symbol symbol=symbolTable.findSymbol(*$1);
                 if(symbol.type=="variable"||symbol.type=="pointer"){
@@ -313,7 +315,11 @@ args         : args  COMMA pidentifier{
                 }else if(symbol.type=="array"){
                 arguments.push_back(*$1);
                 arguments.push_back(std::to_string(symbol.range.first));
-                }}
+                }else if(symbol.type=="pointer_array"){
+                arguments.push_back(*$1);
+                arguments.push_back(std::to_string(symbolTable.findSymbol(*$1).memoryAddress+1));
+                }
+                }
 
 ;
 expression   : value             {value_e(*($1), array_index,symbolTable);}  
