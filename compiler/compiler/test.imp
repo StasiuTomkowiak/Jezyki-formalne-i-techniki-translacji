@@ -1,31 +1,43 @@
-PROCEDURE licz(T s, n) IS
-  j
+PROCEDURE gcd(T z,a,b,c) IS
+  x,y,w
 BEGIN
-  FOR i FROM 2 TO n DO
-    s[i]:=1;
-  ENDFOR
-  FOR i FROM 2 TO n DO
-    IF s[i]>0 THEN 
-      j:=i+i;
-      WHILE j<=n DO
-        s[j]:=0;
-        j:=j+i;
-      ENDWHILE
+  w:=10;
+  x:=a;
+  y:=b;
+  WHILE y>0 DO
+    IF x>=y THEN 
+      x:=x-y;
+    ELSE 
+      x:=x+y;
+      y:=x-y;
+      x:=x-y;    
     ENDIF
-  ENDFOR
+  ENDWHILE
+  c:=x;
+  z[-10]:= c*2 ;
+  z[-7] := -2*c;
+  z[-4] := z[-7]*z[-10] ;
+  z[0]  := w*z[-10] ;
+  z[2]  :=  z[-10]*w;
+  z[5]  := z[-10]*c;
 END
-PROCEDURE wypisz(T s, n) IS
-BEGIN
-  FOR i FROM n DOWNTO 2 DO
-    IF s[i]>0 THEN
-      WRITE i;
-    ENDIF
-  ENDFOR
-END
+
 PROGRAM IS
-  n, sito[2:100]
+  a,b,c,d,x,y,z,f[-10:5]
 BEGIN
-  n:=100;
-  licz(sito,n);
-  wypisz(sito,n);
+  READ a;
+  READ b;
+  READ c;
+  READ d;
+  gcd(f,a,b,x);
+  gcd(f ,c,d,y);
+  gcd(f ,x,y,z);
+  WRITE z;
+  WRITE f[-10];
+  WRITE f[-7];
+  WRITE f[-4];
+  WRITE f[0];
+  WRITE f[2];
+  WRITE f[5];
+
 END
