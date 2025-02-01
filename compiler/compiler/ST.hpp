@@ -20,14 +20,15 @@ struct Symbol {
 
 };
 
-// Tablica symboli
 struct SymbolTable {
-    std::unordered_map<std::string, Symbol> table; // Tablica symboli (klucz: nazwa)
-    int currentScope = 0;                          // Bieżący poziom zakresu
-    int nextMemoryAddress = 100;      
+    std::unordered_map<std::string, Symbol> table; 
+    int currentScope = 0;                          
+    int nextMemoryAddress = 100;    
+    int nextforindex=80;  
 
-    // Metody tablicy symboli
     void addSymbol(const std::string& name, const Symbol& symbol);
+    void addLoop(const std::string& name, const Symbol& symbol);
+
     void addArray(const std::string& name, const Symbol& symbol);
     Symbol findSymbol(const std::string& name) const;
     Symbol findProcedure(const std::string& name) const;

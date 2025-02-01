@@ -133,17 +133,17 @@ command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,
                 newSymbol.name = *$2;
                 newSymbol.type = "variable";
                 newSymbol.petlowa=true;
-                newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
+                newSymbol.memoryAddress = symbolTable.nextforindex;
                 newSymbol.scopeLevel = symbolTable.currentScope;
-                symbolTable.addSymbol(*$2, newSymbol);
+                symbolTable.addLoop(*$2, newSymbol);
                 
                 Symbol newSymbol1;
                 newSymbol1.name = *$2+"n";
                 newSymbol1.type = "variable";
                 newSymbol1.petlowa=true;
-                newSymbol1.memoryAddress = symbolTable.nextMemoryAddress;
+                newSymbol1.memoryAddress = symbolTable.nextforindex;
                 newSymbol1.scopeLevel = symbolTable.currentScope;
-                symbolTable.addSymbol((*$2+"n"), newSymbol1);
+                symbolTable.addLoop((*$2+"n"), newSymbol1);
             
              }  TO value DO {command_line.push_back(commands.size());} commands {command_line.push_back(commands.size());} ENDFOR{                
                     for_to(*$2,*$4,*$7, command_line[command_line.size()-1]-command_line[command_line.size()-2],array_index,  symbolTable);
@@ -151,7 +151,7 @@ command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,
                     command_line.pop_back();
                     symbolTable.removeSymbol(*$2+"n");
                     symbolTable.removeSymbol(*$2);
-                    symbolTable.nextMemoryAddress=symbolTable.nextMemoryAddress-2;
+                    symbolTable.nextforindex=symbolTable.nextforindex-2;
                 
              }
              | FOR pidentifier  FROM value 
@@ -160,16 +160,16 @@ command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,
                 Symbol newSymbol;
                 newSymbol.name = *$2;
                 newSymbol.type = "variable";
-                newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
+                newSymbol.memoryAddress = symbolTable.nextforindex;
                 newSymbol.scopeLevel = symbolTable.currentScope;
-                symbolTable.addSymbol(*$2, newSymbol);
+                symbolTable.addLoop(*$2, newSymbol);
                 
                 Symbol newSymbol1;
                 newSymbol1.name = *$2+"n";
                 newSymbol1.type = "variable";
-                newSymbol1.memoryAddress = symbolTable.nextMemoryAddress;
+                newSymbol1.memoryAddress = symbolTable.nextforindex;
                 newSymbol1.scopeLevel = symbolTable.currentScope;
-                symbolTable.addSymbol((*$2+"n"), newSymbol1);
+                symbolTable.addLoop((*$2+"n"), newSymbol1);
             
              }DOWNTO value DO {command_line.push_back(commands.size());} commands {command_line.push_back(commands.size());} ENDFOR{
                 for_downto(*$2,*$4,*$7, command_line[command_line.size()-1]-command_line[command_line.size()-2],array_index,  symbolTable);
@@ -177,7 +177,7 @@ command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,
                     command_line.pop_back();
                     symbolTable.removeSymbol(*$2+"n");
                     symbolTable.removeSymbol(*$2);
-                    symbolTable.nextMemoryAddress=symbolTable.nextMemoryAddress-2;
+                    symbolTable.nextforindex=symbolTable.nextforindex-2;
                 
              }
              | proc_call SEMICOLON              {

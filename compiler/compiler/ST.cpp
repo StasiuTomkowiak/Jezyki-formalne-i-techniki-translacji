@@ -12,7 +12,16 @@ void SymbolTable::addSymbol(const std::string& name, const Symbol& symbol) {
     table[name] = newSymbol;
     nextMemoryAddress++;
 }
-
+void SymbolTable::addLoop(const std::string& name, const Symbol& symbol) {
+    if (table.find(name) != table.end() && table[name].scopeLevel == currentScope) {
+        throw std::runtime_error("Symbol already declared in current scope: " + name);
+    }
+    Symbol newSymbol = symbol;
+    newSymbol.scopeLevel = currentScope;
+    newSymbol.memoryAddress = nextforindex;
+    table[name] = newSymbol;
+    nextforindex++;
+}
 void SymbolTable::addArray(const std::string& name, const Symbol& symbol) {
     if (table.find(name) != table.end() && table[name].scopeLevel == currentScope) {
         throw std::runtime_error("Symbol already declared in current scope: " + name);
