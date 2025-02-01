@@ -65,13 +65,16 @@ bool e=false;
 
 %%
 
-program_all  : {commands.push_back("jump");procedure_size.push_back(1);}procedures{
-    jump();
-    main_scope=symbolTable.currentScope;
-   
-} main  {
-    
-}
+program_all  :      {
+                        commands.push_back("jump");
+                        procedure_size.push_back(1);
+                    }
+                procedures
+                    {
+                        jump();
+                        main_scope=symbolTable.currentScope;
+                    }  
+                main
 ;
 procedures   :  procedures procedure       
              | 
@@ -252,6 +255,22 @@ args_decl    : args_decl  COMMA pidentifier
                 symbolTable.addSymbol(*$3, newSymbol);
                 }
              | args_decl COMMA TABLE pidentifier
+             {
+                Symbol newSymbol;
+                newSymbol.name = *$4;
+                newSymbol.type = "pointer_array";
+                newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
+                newSymbol.scopeLevel = symbolTable.currentScope;
+                symbolTable.addSymbol(*$4, newSymbol);
+               
+                Symbol newSymbol1;
+                newSymbol1.name = *$4+"offset";
+                newSymbol1.type = "pointer_array_offset";
+                newSymbol1.memoryAddress = symbolTable.nextMemoryAddress;
+                newSymbol1.scopeLevel = symbolTable.currentScope;
+                symbolTable.addSymbol(*$4+"offset", newSymbol1);
+                }
+             
              | pidentifier
                 {
                 Symbol newSymbol;
@@ -262,12 +281,41 @@ args_decl    : args_decl  COMMA pidentifier
                 symbolTable.addSymbol(*$1, newSymbol);
                 }
              | TABLE pidentifier
+             {
+                Symbol newSymbol;
+                newSymbol.name = *$2;
+                newSymbol.type = "pointer_array";
+                newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
+                newSymbol.scopeLevel = symbolTable.currentScope;
+                symbolTable.addSymbol(*$2, newSymbol);
+               
+                Symbol newSymbol1;
+                newSymbol1.name = *$2+"offset";
+                newSymbol1.type = "pointer_array_offset";
+                newSymbol1.memoryAddress = symbolTable.nextMemoryAddress;
+                newSymbol1.scopeLevel = symbolTable.currentScope;
+                symbolTable.addSymbol(*$2+"offset", newSymbol1);
+                }
 
 ;
-args         : args  COMMA pidentifier{arguments.push_back(*$3);
+args         : args  COMMA pidentifier{
+                Symbol symbol=symbolTable.findSymbol(*$3);
+                if(symbol.type=="variable"){
+                arguments.push_back(*$3);
+                }else if(symbol.type=="array"){
+                arguments.push_back(*$3);
+                arguments.push_back(std::to_string(symbol.range.first));
+                }
 
 }
-             | pidentifier {arguments.push_back(*$1);}
+             | pidentifier {
+                Symbol symbol=symbolTable.findSymbol(*$1);
+                if(symbol.type=="variable"){
+                arguments.push_back(*$1);
+                }else if(symbol.type=="array"){
+                arguments.push_back(*$1);
+                arguments.push_back(std::to_string(symbol.range.first));
+                }}
 ;
 expression   : value             {value_e(*($1), array_index,symbolTable);}  
              | value ADD value   {add(*($1), *($3), array_index,symbolTable);}

@@ -19,6 +19,10 @@ void read(const std::string& identifier, std::vector<std::string>& array_index,S
                 commands.push_back("GET 0\n" );
                 store_pointer(identifier,symbolTable);
             }
+        else if (symbol.type == "pointer_array") {
+                commands.push_back("GET 0\n" );
+                store_array_pointer( array_index, n-1 ,1,identifier,symbolTable);
+            }
     } catch (const std::runtime_error& e) {
         // Jeśli zmienna nie istnieje, zgłoś błąd
         std::cerr << "Error: Variable '" << identifier << "' not declared.\n";
@@ -49,6 +53,10 @@ void write(const std::string& value,std::vector<std::string>& array_index, const
                 
             }else if (symbol.type == "pointer") {
                 load_pointer(value,symbolTable);
+                commands.push_back("PUT 0\n");
+            }
+            else if (symbol.type == "pointer_array") {
+                load_array_pointer(array_index, n-1 ,1,value,symbolTable);
                 commands.push_back("PUT 0\n");
             }
             else{
@@ -82,6 +90,10 @@ void assign(const std::string& identifier,std::vector<std::string>& array_index,
         else if(symbol.type=="pointer"){
             
             store_pointer(identifier,symbolTable);
+        }
+        else if(symbol.type=="pointer_array"){
+            
+            store_array_pointer(array_index, n-1 ,1,identifier,symbolTable);
         }
         }else{
                 throw std::runtime_error("ASSINING loop variable.");
@@ -430,6 +442,9 @@ void add(const std::string& value1, const std::string& value2, std::vector<std::
             else if(symbol2.type=="pointer"){
                 commands.push_back("SET " + std::to_string(number1) + "\n");
                 add_point(value2,symbolTable);            
+            }else if(symbol2.type=="pointer_array"){
+                commands.push_back("SET " + std::to_string(number1)  + "\n");
+                add_array_pointer( array_index, n-1 ,2,value2,symbolTable);  
             }
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in ADD: " << e.what() << "\n";
@@ -453,6 +468,10 @@ void add(const std::string& value1, const std::string& value2, std::vector<std::
                 commands.push_back("SET " + std::to_string(number2)  + "\n");
                 add_point(value1,symbolTable);  
             }
+            else if(symbol1.type=="pointer_array"){
+                commands.push_back("SET " + std::to_string(number2)  + "\n");
+                add_array_pointer( array_index, n-2 ,2,value1,symbolTable);  
+            }
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in ADD: " << e.what() << "\n";
             exit(1);
@@ -470,6 +489,8 @@ void add(const std::string& value1, const std::string& value2, std::vector<std::
             }
             else if(symbol1.type=="pointer"){
                 load_pointer(value1,symbolTable);          
+            }else if(symbol1.type=="pointer_array"){
+                 load_array_pointer(array_index, n-2 ,2,value1,symbolTable);          
             }
 
             if(symbol2.type=="pointer"){
@@ -480,6 +501,9 @@ void add(const std::string& value1, const std::string& value2, std::vector<std::
             }
             else if(symbol2.type=="variable"){
                 add_variable(value2,symbolTable); 
+            }
+            else if(symbol2.type=="pointer_array"){
+                 add_array_pointer(array_index, n-1 ,3,value2,symbolTable);          
             }
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in ADD: " << e.what() << "\n";
@@ -1978,8 +2002,13 @@ void procedure_store_pointer(const std::string& symbol,std::vector<string>& argu
     std::vector<int> memory_address;
     int scope=symbol1.scopeLevel;
     for(int i=0;i<arguments.size();i++){
+        if(isNumber(arguments[i])){
+        memory_address.push_back(std::stoi(arguments[i]));;
+        }
+        else if (symbolTable.symbolExist(arguments[i])){
         Symbol symbol2=symbolTable.findSymbol(arguments[i]);
         memory_address.push_back(symbol2.memoryAddress);
+        }
     }
     symbolTable.currentScope=symbol1.scopeLevel;
     for(int i=0;i<arguments.size();i++){
@@ -1987,5 +2016,89 @@ void procedure_store_pointer(const std::string& symbol,std::vector<string>& argu
         commands.push_back("STORE "+to_string(symbol1.memoryAddress+i+1)+"\n");
     }
 
+}
+void add_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable) {
 
+
+    if(isNumber(array[index])){
+        Symbol symbol = symbolTable.findSymbol(value1);
+        commands.push_back("STORE 5\n");
+        commands.push_back("SET " + array[index]+"\n");
+        commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        commands.push_back("LOAD " + to_string(symbol.memoryAddress)+ "\n");
+        commands.push_back("SUB " + to_string(symbol.memoryAddress+1)+ "\n");
+        commands.push_back("ADD " + to_string(sym_num)+ "\n");
+        commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        commands.push_back("LOAD 5\n");
+        commands.push_back("ADDI " + to_string(sym_num)+ "\n");
+
+    }
+    else if(symbolTable.symbolExist(array[index])){
+        Symbol symbol = symbolTable.findSymbol(array[index]);
+        //int offset=memory_adress-range.first;
+        //commands.push_back("STORE 5\n");
+        ///commands.push_back("SET " + to_string(offset)+ "\n");
+        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        //commands.push_back("LOAD " + to_string(symbol.memoryAddress)+ "\n");
+        //commands.push_back("ADD " + to_string(sym_num)+ "\n");
+        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        //commands.push_back("LOAD 5\n");
+        //commands.push_back("ADDI " + to_string(sym_num)+ "\n");
+    }
+  
+}
+
+void load_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable) {
+    
+
+    if(isNumber(array[index])){
+         if(isNumber(array[index])){
+        Symbol symbol = symbolTable.findSymbol(value1);
+        commands.push_back("SET " + array[index]+"\n");
+        commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        commands.push_back("LOAD " + to_string(symbol.memoryAddress)+ "\n");
+        commands.push_back("SUB " + to_string(symbol.memoryAddress+1)+ "\n");
+        commands.push_back("ADD " + to_string(sym_num)+ "\n");
+        commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        commands.push_back("LOADI " + to_string(sym_num)+ "\n");
+    }
+    }
+    else if(symbolTable.symbolExist(array[index])){
+        Symbol symbol = symbolTable.findSymbol(array[index]);
+        //int offset=memory_adress-range.first;
+        //commands.push_back("SET " + to_string(offset)+ "\n");
+        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        //commands.push_back("LOAD " + to_string(symbol.memoryAddress)+ "\n");
+        //commands.push_back("ADD " + to_string(sym_num)+ "\n");
+        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        //commands.push_back("LOADI " + to_string(sym_num)+ "\n");
+    }
+}
+void store_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable) {
+    
+
+    if(isNumber(array[index])){
+         if(isNumber(array[index])){
+        Symbol symbol = symbolTable.findSymbol(value1);
+        commands.push_back("STORE 5\n");
+        commands.push_back("SET " + array[index]+"\n");
+        commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        commands.push_back("LOAD " + to_string(symbol.memoryAddress)+ "\n");
+        commands.push_back("SUB " + to_string(symbol.memoryAddress+1)+ "\n");
+        commands.push_back("ADD " + to_string(sym_num)+ "\n");
+        commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        commands.push_back("LOAD 5\n");
+        commands.push_back("STOREI " + to_string(sym_num)+ "\n");
+    }
+    }
+    else if(symbolTable.symbolExist(array[index])){
+        Symbol symbol = symbolTable.findSymbol(array[index]);
+        //int offset=memory_adress-range.first;
+        //commands.push_back("SET " + to_string(offset)+ "\n");
+        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        //commands.push_back("LOAD " + to_string(symbol.memoryAddress)+ "\n");
+        //commands.push_back("ADD " + to_string(sym_num)+ "\n");
+        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        //commands.push_back("LOADI " + to_string(sym_num)+ "\n");
+    }
 }

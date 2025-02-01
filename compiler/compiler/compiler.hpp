@@ -55,6 +55,10 @@ void add_point(const std::string& value1,const SymbolTable& symbolTable);
 void sub_point(const std::string& value1,const SymbolTable& symbolTable);
 void store_pointer(const std::string& value1,const SymbolTable& symbolTable);
 
+void load_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable);
+void add_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable);
+void store_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable);
+
 
 void end();
 void rtn();

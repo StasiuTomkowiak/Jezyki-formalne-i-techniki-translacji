@@ -1,6 +1,11 @@
-PROCEDURE gcd(a,b,c) IS
+PROCEDURE gcd(T z,a,b,c) IS
   x,y
 BEGIN
+  z[-2]:=80;
+  z[2]:=40;
+  z[4]:=30;
+  z[7]:=20;
+
   x:=a;
   y:=b;
   WHILE y>0 DO
@@ -13,17 +18,28 @@ BEGIN
     ENDIF
   ENDWHILE
   c:=x;
+  z[-2]:=z[7]+10;
+  z[2]:=c+z[7];
+
+  WRITE z[-2];
+  WRITE z[2];
+  WRITE z[4];
+  WRITE z[7];
 END
 
 PROGRAM IS
-  a,b,c,d,x,y,z
+  a,b,c,d,x,y,z,f[-5:10]
 BEGIN
   READ a;
   READ b;
   READ c;
   READ d;
-  gcd(a,b,x);
-  gcd(c,d,y);
-  gcd(x,y,z);
+  gcd(f,a,b,x);
+  gcd( f,c,d,y);
+  gcd( f,x,y,z);
   WRITE z;
+  WRITE f[-2];
+  WRITE f[2];
+  WRITE f[4];
+  WRITE f[7];
 END
