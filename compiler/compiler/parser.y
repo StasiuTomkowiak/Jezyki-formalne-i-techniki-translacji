@@ -22,10 +22,9 @@ std::vector<int> command_line;
 std::vector<int> procedure_size;
 std::vector<std::string> arguments;
 
- int main_scope;
-
+int main_scope;
 bool e=false;
-
+bool procedure_main=true;
 
 %}
 
@@ -58,21 +57,19 @@ bool e=false;
 %type <pidentifier> value
 %type <expression> expression
 
-
-
-
-
-
 %%
 
 program_all  :      {
                         commands.push_back("jump");
                         procedure_size.push_back(1);
+                        main_scope=symbolTable.currentScope;
                     }
                 procedures
                     {
                         jump();
                         main_scope=symbolTable.currentScope;
+                        procedure_main=false;
+
                     }  
                 main
 ;
@@ -84,15 +81,13 @@ procedure:       PROCEDURE proc_head IS _BEGIN commands END
                     rtn();
                     symbolTable.currentScope++;
                     procedure_size.push_back(commands.size());
-                    for(int i=0;i<procedure_size.size();i++)
-                    std::cout<<procedure_size[i]<<std::endl;                
+                    main_scope=symbolTable.currentScope;             
                 }
                 |PROCEDURE proc_head IS declarations _BEGIN commands END {
                     rtn();
                     symbolTable.currentScope++;
                     procedure_size.push_back(commands.size());
-                    for(int i=0;i<procedure_size.size();i++)
-                    std::cout<<procedure_size[i]<<std::endl;
+                    main_scope=symbolTable.currentScope;
                 }
                 ;
 
@@ -187,7 +182,7 @@ command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,
              }
              | proc_call SEMICOLON              {
                 procedure_call(*$1,procedure_size, symbolTable);
-                 symbolTable.currentScope=main_scope;
+                symbolTable.currentScope=main_scope;
              }
              | READ identifier SEMICOLON       {read(*$2,array_index, symbolTable);}             
              | WRITE value SEMICOLON           {write(*$2,array_index, symbolTable);}
@@ -205,9 +200,8 @@ proc_head    : pidentifier {
 ;
 proc_call    : pidentifier LPRNT args RPRNT{
                 //funkcja przypiisujaca wartosci wskaznikow
-                procedure_store_pointer(*$1, arguments , symbolTable);
+                procedure_store_pointer(*$1, arguments , symbolTable,procedure_main);
                 arguments.erase(arguments.begin() , arguments.end());  
-
                 $$=$1;
                 }
 ;
@@ -300,7 +294,7 @@ args_decl    : args_decl  COMMA pidentifier
 ;
 args         : args  COMMA pidentifier{
                 Symbol symbol=symbolTable.findSymbol(*$3);
-                if(symbol.type=="variable"){
+                if(symbol.type=="variable"||symbol.type=="pointer"){
                 arguments.push_back(*$3);
                 }else if(symbol.type=="array"){
                 arguments.push_back(*$3);
@@ -310,12 +304,13 @@ args         : args  COMMA pidentifier{
 }
              | pidentifier {
                 Symbol symbol=symbolTable.findSymbol(*$1);
-                if(symbol.type=="variable"){
+                if(symbol.type=="variable"||symbol.type=="pointer"){
                 arguments.push_back(*$1);
                 }else if(symbol.type=="array"){
                 arguments.push_back(*$1);
                 arguments.push_back(std::to_string(symbol.range.first));
                 }}
+                
 ;
 expression   : value             {value_e(*($1), array_index,symbolTable);}  
              | value ADD value   {add(*($1), *($3), array_index,symbolTable);}

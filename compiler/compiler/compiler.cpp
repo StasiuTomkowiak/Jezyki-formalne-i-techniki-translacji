@@ -538,6 +538,9 @@ void sub(const std::string& value1, const std::string& value2,std::vector<std::s
             }else if(symbol2.type=="pointer"){
                 commands.push_back("SET " + std::to_string(number1) + "\n");
                 sub_point(value2,symbolTable); 
+            }else if(symbol2.type=="pointer_array"){
+                commands.push_back("SET " + std::to_string(number1)  + "\n");
+                sub_array_pointer( array_index, n-1 ,3,value2,symbolTable);  
             }        
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in SUB: " << e.what() << "\n";
@@ -554,9 +557,12 @@ void sub(const std::string& value1, const std::string& value2,std::vector<std::s
                 std::vector<std::string> temp;   
                 commands.push_back("SET " + std::to_string(-number2) + "\n");
                 add_array( array_index, n-2 ,2,symbol1.range,symbol1.memoryAddress,symbolTable);  
-            }if(symbol1.type=="pointer"){
+            }else if(symbol1.type=="pointer"){
                 commands.push_back("SET " + std::to_string(-number2) + "\n");
                 add_point(value1,symbolTable); 
+            }else if(symbol1.type=="pointer_array"){
+                commands.push_back("SET " + std::to_string(-number2)  + "\n");
+                add_array_pointer( array_index, n-2 ,2,value1,symbolTable);  
             }
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in SUB: " << e.what() << "\n";
@@ -574,6 +580,8 @@ void sub(const std::string& value1, const std::string& value2,std::vector<std::s
             }
             else if(symbol1.type=="pointer"){
                 load_pointer(value1,symbolTable);
+            }else if(symbol1.type=="pointer_array"){
+                load_array_pointer( array_index, n-2 ,2,value1,symbolTable);  
             }
 
             if(symbol2.type=="variable"){
@@ -584,6 +592,8 @@ void sub(const std::string& value1, const std::string& value2,std::vector<std::s
             }
             else if(symbol2.type=="pointer"){
                 sub_point(value2,symbolTable);              
+            }else if(symbol2.type=="pointer_array"){
+                sub_array_pointer( array_index, n-1 ,3,value2,symbolTable);  
             }
         } catch (const std::runtime_error& e) {
             std::cerr << "Error in SUB: " << e.what() << "\n";
@@ -1577,8 +1587,8 @@ void end()
 }
 void rtn()
 {
-   
-    commands.push_back("RTRN 9\n");
+    
+    commands.push_back("RTRN "+to_string(9+symbolTable.currentScope)+"\n");
   
 }
 
@@ -1991,16 +2001,18 @@ void procedure_call(const std::string& symbol,std::vector<int>& procedure_size,c
     Symbol symbol1=symbolTable.findProcedure(symbol);
     
     commands.push_back("SET  "+to_string(n+3)+"\n");
-    commands.push_back("STORE 9\n");
+    commands.push_back("STORE "+to_string(9+symbol1.scopeLevel)+"\n");
     n=n-procedure_size[symbol1.scopeLevel]+2;
     commands.push_back("JUMP "+to_string(-n)+"\n");
 }
-void procedure_store_pointer(const std::string& symbol,std::vector<string>& arguments ,SymbolTable& symbolTable){
+void procedure_store_pointer(const std::string& symbol,std::vector<string>& arguments ,SymbolTable& symbolTable,bool procedure){
+
 
     Symbol symbol1=symbolTable.findProcedure(symbol);
 
     std::vector<int> memory_address;
     int scope=symbol1.scopeLevel;
+    if(procedure==false){
     for(int i=0;i<arguments.size();i++){
         if(isNumber(arguments[i])){
         memory_address.push_back(std::stoi(arguments[i]));;
@@ -2014,12 +2026,25 @@ void procedure_store_pointer(const std::string& symbol,std::vector<string>& argu
     for(int i=0;i<arguments.size();i++){
         commands.push_back("SET  "+to_string(memory_address[i])+"\n");
         commands.push_back("STORE "+to_string(symbol1.memoryAddress+i+1)+"\n");
+    }}
+    else{
+        for(int i=0;i<arguments.size();i++){
+        if(isNumber(arguments[i])){
+        memory_address.push_back(std::stoi(arguments[i]));;
+        }
+        else if (symbolTable.symbolExist(arguments[i])){
+        Symbol symbol2=symbolTable.findSymbol(arguments[i]);
+        memory_address.push_back(symbol2.memoryAddress);
+        }
+    }
+    symbolTable.currentScope=symbol1.scopeLevel;
+    for(int i=0;i<arguments.size();i++){
+        commands.push_back("LOAD  "+to_string(memory_address[i])+"\n");
+        commands.push_back("STORE "+to_string(symbol1.memoryAddress+i+1)+"\n");
+    }}
     }
 
-}
 void add_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable) {
-
-
     if(isNumber(array[index])){
         Symbol symbol = symbolTable.findSymbol(value1);
         commands.push_back("STORE 5\n");
@@ -2045,9 +2070,35 @@ void add_array_pointer(const std::vector<std::string>& array, int index ,int sym
         //commands.push_back("LOAD 5\n");
         //commands.push_back("ADDI " + to_string(sym_num)+ "\n");
     }
-  
 }
 
+void sub_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable) {
+    if(isNumber(array[index])){
+        Symbol symbol = symbolTable.findSymbol(value1);
+        commands.push_back("STORE 5\n");
+        commands.push_back("SET " + array[index]+"\n");
+        commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        commands.push_back("LOAD " + to_string(symbol.memoryAddress)+ "\n");
+        commands.push_back("SUB " + to_string(symbol.memoryAddress+1)+ "\n");
+        commands.push_back("ADD " + to_string(sym_num)+ "\n");
+        commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        commands.push_back("LOAD 5\n");
+        commands.push_back("SUBI " + to_string(sym_num)+ "\n");
+
+    }
+    else if(symbolTable.symbolExist(array[index])){
+        Symbol symbol = symbolTable.findSymbol(array[index]);
+        //int offset=memory_adress-range.first;
+        //commands.push_back("STORE 5\n");
+        ///commands.push_back("SET " + to_string(offset)+ "\n");
+        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        //commands.push_back("LOAD " + to_string(symbol.memoryAddress)+ "\n");
+        //commands.push_back("ADD " + to_string(sym_num)+ "\n");
+        //commands.push_back("STORE " + to_string(sym_num)+ "\n");
+        //commands.push_back("LOAD 5\n");
+        //commands.push_back("ADDI " + to_string(sym_num)+ "\n");
+    }
+}
 void load_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable) {
     
 

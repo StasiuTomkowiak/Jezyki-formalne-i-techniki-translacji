@@ -57,6 +57,7 @@ void store_pointer(const std::string& value1,const SymbolTable& symbolTable);
 
 void load_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable);
 void add_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable);
+void sub_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable);
 void store_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable);
 
 
@@ -64,7 +65,7 @@ void end();
 void rtn();
 void jump();
 void procedure_call(const std::string& symbol,std::vector<int>& procedure_size,const SymbolTable& symbolTable);
-void procedure_store_pointer(const std::string& symbol,std::vector<string>& arguments ,SymbolTable& symbolTable);
+void procedure_store_pointer(const std::string& symbol,std::vector<string>& arguments ,SymbolTable& symbolTable,bool procedure);
 
 
 std::vector<std::string>* merge(const std::vector<std::string>& vec1, const std::vector<std::string>& vec2);
