@@ -1,20 +1,33 @@
-PROGRAM IS
-	n, j, ta[0:24], tb[0:24], tc[0:24]
+# Kombinacje 2
+# ? 20
+# ? 9
+# > 167960
+
+PROCEDURE factorial(T s,n) IS
+  p
 BEGIN
-	n:=24;
-	tc[0]:=n;
-	tc[n]:=n-tc[0];
-        j:=tc[0]+1;
-        FOR i FROM tc[0] DOWNTO tc[n] DO
-		ta[i]:=i;
-		tb[i]:=n-i;
-	ENDFOR
-        j:=tc[n];
-        WHILE j<=tc[0] DO
-		tc[j]:=ta[j]*tb[j];
-                j:=j+1;
-	ENDWHILE
-        FOR i FROM 0 TO n DO
-		WRITE tc[i];
-	ENDFOR
+  s[0]:=1;
+  p:=s[0];
+  FOR i FROM 1 TO n DO
+    s[i]:=p*i;
+    p:=s[i];
+  ENDFOR
+END
+
+PROCEDURE bc(n,k,m) IS
+  s[0:100],p
+BEGIN
+  factorial(s,n);
+  p:=n-k;
+  m:=s[n]/s[k];
+  m:=m/s[p];
+END
+
+PROGRAM IS
+    n,k,w
+BEGIN
+    READ n;
+    READ k;
+    (n,k,w);
+    WRITE w;
 END

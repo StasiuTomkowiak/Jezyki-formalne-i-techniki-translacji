@@ -6,6 +6,7 @@ void read(const std::string& identifier, std::vector<std::string>& array_index,S
     try {
         // Sprawdź, czy zmienna istnieje
         Symbol symbol = symbolTable.findSymbol(identifier);
+        if(symbol.petlowa==false){
         int n=array_index.size();
 
          if (symbol.type == "variable") {
@@ -22,10 +23,12 @@ void read(const std::string& identifier, std::vector<std::string>& array_index,S
         else if (symbol.type == "pointer_array") {
                 commands.push_back("GET 0\n" );
                 store_array_pointer( array_index, n-1 ,1,identifier,symbolTable);
+            }}else{
+                throw std::runtime_error("ASSINING loop variable.");
             }
     } catch (const std::runtime_error& e) {
        
-        std::cerr << "Error: Variable '" << identifier << "' not declared.\n";
+        std::cerr << "Error: Variable '" << identifier << "' not declared or reading loop variable in line "<<yylineno<<"\n";
         exit(1); 
     }
     array_index.pop_back();
@@ -63,7 +66,7 @@ void write(const std::string& value,std::vector<std::string>& array_index, const
                 throw std::runtime_error("WRITE only supports variables or numbers.");
             }
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in WRITE: " << e.what() << "\n";
+            std::cerr << "Error in WRITE: " << e.what()  <<" in line "<<yylineno<< "\n";
             exit(1);
         }
     }
@@ -99,7 +102,7 @@ void assign(const std::string& identifier,std::vector<std::string>& array_index,
             }
     } catch (const std::runtime_error& e) {
         // Jeśli zmienna nie istnieje, zgłoś błąd
-        std::cerr << "Error: Variable '" << identifier << "' not declared or assigning loop variable.\n";
+        std::cerr << "Error: Variable '" << identifier << "' not declared or assigning loop variable" <<" in line "<<yylineno<<"\n";
         exit(1); // Możesz zastąpić bardziej eleganckim zarządzaniem błędami
     } 
     array_index.pop_back(); 
@@ -495,7 +498,7 @@ void add(const std::string& value1, const std::string& value2, std::vector<std::
                 add_array_pointer( array_index, n-1 ,2,value2,symbolTable);  
             }
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in ADD: " << e.what() << "\n";
+            std::cerr << "Error in ADD: " << e.what()  <<" in line "<<yylineno<< "\n";
             exit(1);
         }
     } else if (isNumber(value2)) {
@@ -521,7 +524,7 @@ void add(const std::string& value1, const std::string& value2, std::vector<std::
                 add_array_pointer( array_index, n-2 ,2,value1,symbolTable);  
             }
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in ADD: " << e.what() << "\n";
+            std::cerr << "Error in ADD: " << e.what()  <<" in line "<<yylineno<< "\n";
             exit(1);
         }
     } else {
@@ -554,7 +557,7 @@ void add(const std::string& value1, const std::string& value2, std::vector<std::
                  add_array_pointer(array_index, n-1 ,3,value2,symbolTable);          
             }
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in ADD: " << e.what() << "\n";
+            std::cerr << "Error in ADD: " << e.what()  <<" in line "<<yylineno<< "\n";
             exit(1);
         }
     }
@@ -591,7 +594,7 @@ void sub(const std::string& value1, const std::string& value2,std::vector<std::s
                 sub_array_pointer( array_index, n-1 ,3,value2,symbolTable);  
             }        
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in SUB: " << e.what() << "\n";
+            std::cerr << "Error in SUB: " << e.what()  <<" in line "<<yylineno<<"\n";
             exit(1);
         }
     } else if (isNumber(value2)) {
@@ -613,7 +616,7 @@ void sub(const std::string& value1, const std::string& value2,std::vector<std::s
                 add_array_pointer( array_index, n-2 ,2,value1,symbolTable);  
             }
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in SUB: " << e.what() << "\n";
+            std::cerr << "Error in SUB: " << e.what()  <<" in line "<<yylineno<< "\n";
             exit(1);
         }
     } else {
@@ -644,7 +647,7 @@ void sub(const std::string& value1, const std::string& value2,std::vector<std::s
                 sub_array_pointer( array_index, n-1 ,3,value2,symbolTable);  
             }
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in SUB: " << e.what() << "\n";
+            std::cerr << "Error in SUB: " << e.what()  <<" in line "<<yylineno<< "\n";
             exit(1);
         }
     }
@@ -798,7 +801,7 @@ void mul(const std::string& value1, const std::string& value2, std::vector<std::
     commands.push_back("STORE 5\n");
     mul_pos();
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in MUL: " << e.what() << "\n";
+            std::cerr << "Error in MULTIPLICATION: " << e.what()  <<" in line "<<yylineno<< "\n";
             exit(1);
         }
     } else if (isNumber(value2)) {
@@ -906,7 +909,7 @@ void mul(const std::string& value1, const std::string& value2, std::vector<std::
     commands.push_back("STORE 5\n");
     mul_pos();
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in MUL: " << e.what() << "\n";
+            std::cerr << "Error in MULTIPLICATION: " << e.what()  <<" in line "<<yylineno<<"\n";
             exit(1);
         }
     } else {
@@ -1024,7 +1027,7 @@ void mul(const std::string& value1, const std::string& value2, std::vector<std::
          commands.push_back("STORE 5\n");
             mul_pos();
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in MUL: " << e.what() << "\n";
+            std::cerr << "Error in MULTIPLICATION: " << e.what()  <<" in line "<<yylineno<< "\n";
             exit(1);
         }
     }
@@ -1186,7 +1189,7 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
                 div_pos();             
         }
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in DIV: " << e.what() << "\n";
+            std::cerr << "Error in DIV: " << e.what()  <<" in line "<<yylineno<< "\n";
             exit(1);
         }
     } else if (isNumber(value2)) {
@@ -1320,7 +1323,7 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
                 div_pos();
         }
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in DIV: " << e.what() << "\n";
+            std::cerr << "Error in DIV: " << e.what()  <<" in line "<<yylineno<< "\n";
             exit(1);
         }
     } else {
@@ -1422,7 +1425,7 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
             commands.push_back("STORE 3\n");
             div_pos();
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in DIV: " << e.what() << "\n";
+            std::cerr << "Error in DIV: " << e.what()  <<" in line "<<yylineno<< "\n";
             exit(1);
         }
     }
@@ -1597,7 +1600,7 @@ void mod(const std::string& value1, const std::string& value2, std::vector<std::
                                
         }  
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in DIV: " << e.what() << "\n";
+            std::cerr << "Error in MOD: " << e.what() <<" in line "<<yylineno<< "\n";
             exit(1);
         }
     } else if (isNumber(value2)) {
@@ -1725,7 +1728,7 @@ void mod(const std::string& value1, const std::string& value2, std::vector<std::
                 mod_pos();
         }
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in DIV: " << e.what() << "\n";
+            std::cerr << "Error in MOD: " << e.what()<<" in line "<<yylineno<< "\n";
             exit(1);
         }
     } else {
@@ -1827,7 +1830,7 @@ void mod(const std::string& value1, const std::string& value2, std::vector<std::
             commands.push_back("STORE 3\n");
             mod_pos();
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error in DIV: " << e.what() << "\n";
+            std::cerr << "Error in MOD: " << e.what()  <<" in line "<<yylineno<< "\n";
             exit(1);
         }
     }
@@ -1854,7 +1857,7 @@ void  value_e(const std::string& value1,std::vector<std::string>& array_index,co
                 load_array_pointer( array_index, n-1 ,2,value1,symbolTable);  
             }
         } catch (const std::runtime_error& e) {
-            std::cerr << "Error declared value or variable: " << e.what() << "\n";
+            std::cerr << "Error declared value or variable: " << e.what() <<" in line "<<yylineno<< "\n";
             exit(1);
         }
     }
@@ -2377,6 +2380,24 @@ void procedure_store_pointer(const std::string& symbol,std::vector<string>& argu
                 type.push_back("pointer_array");
                 type.push_back("pointer_array");
             }
+        }
+    }
+    if(symbolTable.currentScope==scope){
+        std::cerr << "Error: Procedure recursion '" << symbol1.name<< "' is not allowed in line "<<yylineno<<"\n";
+        exit(1); 
+    }
+    if(arguments.size()!=symbol1.parameters.size()){
+         std::cerr << "Error: Wrong arguments declaration in procedure in line: "<<yylineno<<"\n";
+                exit(1); 
+    }
+    for(int i=0;i<arguments.size();i++){
+        if((type[i]=="array"&&symbol1.parameters[i]=="pointer")||(type[i]=="pointer_array"&&symbol1.parameters[i]=="pointer")){
+                std::cerr << "Error: Wrong arguments declaration in procedure in line: "<<yylineno<<"\n";
+                exit(1); 
+        }
+        if((type[i]=="variable"&&symbol1.parameters[i]=="pointer_array")||(type[i]=="pointer"&&symbol1.parameters[i]=="pointer_array")){
+                std::cerr << "Error: Wrong arguments declaration in procedure in line: "<<yylineno<<"\n";
+                exit(1); 
         }
     }
     symbolTable.currentScope=symbol1.scopeLevel;

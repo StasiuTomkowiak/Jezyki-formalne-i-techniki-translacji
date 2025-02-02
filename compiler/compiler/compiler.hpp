@@ -17,6 +17,9 @@ using namespace std;
 
 extern SymbolTable symbolTable;
 extern std::vector<std::string> commands;
+extern int yylineno;
+ 
+
 
 void assign(const std::string& identifier,std::vector<std::string>& array_index, SymbolTable& symbolTable);
 void if_then(const std::vector<std::string>& condition,int n,std::vector<std::string>& array_index,const SymbolTable& symbolTable);

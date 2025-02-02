@@ -8,14 +8,16 @@
 #include <stdexcept>
 #include <utility>
 
-// Struktura przechowująca informacje o symbolach
+extern int yylineno;
+
 struct Symbol {
-    std::string name;                         // Nazwa identyfikatora
-    std::string type;                         // Typ: "variable", "array", "procedure"
-    int memoryAddress;                        // Adres w pamięci
-    int scopeLevel;                           // Poziom zakresu (zagnieżdżenie)
-    std::pair<int, int> range;                // Zakres (dla tablic, np. [-10, 10])
-    std::vector<std::string> parameters;     // Parametry procedury (jeśli dotyczy)
+    std::string name;                         
+    std::string type;                         
+    int memoryAddress;                        
+    int scopeLevel;                           
+    std::pair<int, int> range;    
+    std::vector<std::string> parameters;               
+    bool initialized=false;
     bool petlowa=false;
 
 };
@@ -23,9 +25,9 @@ struct Symbol {
 struct SymbolTable {
     std::unordered_map<std::string, Symbol> table; 
     int currentScope = 0;                          
-    int nextMemoryAddress = 100;    
-    int nextforindex=80;  
-
+    int nextMemoryAddress = 1000;    
+    int nextforindex=900;  
+ 
     void addSymbol(const std::string& name, const Symbol& symbol);
     void addLoop(const std::string& name, const Symbol& symbol);
 
@@ -36,9 +38,12 @@ struct SymbolTable {
 
     int getArrayElementAddress(const std::string& arrayName, int index) const ;
     void removeCurrentScope();
+    void symbolInitialized(const std::string& name);
+void procParam(const std::string& name,std::string value);
     bool symbolExist(const std::string& name) const;
     void enterScope();
     void exitScope();
+    bool ProcedureRec(const std::string& name); 
     void ChangeScope(int n);
 
     int calculateRangeLength(const Symbol& symbol); 

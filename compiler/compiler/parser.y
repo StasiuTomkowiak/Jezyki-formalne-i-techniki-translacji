@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <algorithm>
 #include "parser.h"
 #include "compiler.hpp"
 #include "ST.hpp"
@@ -21,15 +22,18 @@ std::vector<std::string> array_index;
 std::vector<int> command_line;
 std::vector<int> procedure_size;
 std::vector<std::string> arguments;
+Symbol pro;
 
 int main_scope;
 bool e=false;
 bool procedure_main=true;
+bool arguments_decl=false;
+int line;
 
 %}
 
 %union {
-    int num;
+    long long num;
     std::string* pidentifier;
     std::vector<std::string>* condition;
    
@@ -103,9 +107,14 @@ else         : ELSE commands {
                 }   
             | {e=false;}
 ;
-command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,  symbolTable);}
+command      : identifier ASSIGN expression  SEMICOLON {
+                symbolTable.symbolInitialized(*$1);
+                assign(*$1, array_index,  symbolTable);}
            
-             | IF condition THEN {command_line.push_back(commands.size());} commands {command_line.push_back(commands.size());} else ENDIF  {
+             | IF condition THEN {command_line.push_back(commands.size());} 
+             commands {command_line.push_back(commands.size());} 
+             else 
+             ENDIF  {
                 if(e==false){
                 if_then(*$2, command_line[command_line.size()-1]-command_line[command_line.size()-2],array_index,  symbolTable);
                  command_line.pop_back();
@@ -133,6 +142,7 @@ command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,
                 newSymbol.name = *$2;
                 newSymbol.type = "variable";
                 newSymbol.petlowa=true;
+                newSymbol.initialized=true;
                 newSymbol.memoryAddress = symbolTable.nextforindex;
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addLoop(*$2, newSymbol);
@@ -141,6 +151,7 @@ command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,
                 newSymbol1.name = *$2+"n";
                 newSymbol1.type = "variable";
                 newSymbol1.petlowa=true;
+                newSymbol1.initialized=true;
                 newSymbol1.memoryAddress = symbolTable.nextforindex;
                 newSymbol1.scopeLevel = symbolTable.currentScope;
                 symbolTable.addLoop((*$2+"n"), newSymbol1);
@@ -161,12 +172,14 @@ command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,
                 newSymbol.name = *$2;
                 newSymbol.type = "variable";
                 newSymbol.memoryAddress = symbolTable.nextforindex;
+                newSymbol.initialized=true;
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addLoop(*$2, newSymbol);
                 
                 Symbol newSymbol1;
                 newSymbol1.name = *$2+"n";
                 newSymbol1.type = "variable";
+                newSymbol1.initialized=true;
                 newSymbol1.memoryAddress = symbolTable.nextforindex;
                 newSymbol1.scopeLevel = symbolTable.currentScope;
                 symbolTable.addLoop((*$2+"n"), newSymbol1);
@@ -181,35 +194,46 @@ command      : identifier ASSIGN expression  SEMICOLON {assign(*$1, array_index,
                 
              }
              | proc_call SEMICOLON              {
+               
                 procedure_call(*$1,procedure_size, symbolTable);
                 symbolTable.currentScope=main_scope;
+                arguments_decl=false;
              }
-             | READ identifier SEMICOLON       {read(*$2,array_index, symbolTable);}             
+             | READ identifier SEMICOLON       {
+                symbolTable.symbolInitialized(*$2);
+                read(*$2,array_index, symbolTable);}             
              | WRITE value SEMICOLON           {write(*$2,array_index, symbolTable);}
 ;
 proc_head    : pidentifier {
                 if(symbolTable.ProcedureExist(*$1)){
-                    std::cerr << "Error: Procedure '" << *$1 << "' exists\n";
+                    std::cerr << "Error: Procedure '" << *$1 << "' exists in line "<<yylineno<<"\n";
                     exit(1); 
                 }
                 Symbol newSymbol;
                 newSymbol.name = *$1;
                 newSymbol.type = "procedure";
+                newSymbol.initialized=true;
                 newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addSymbol(*$1, newSymbol);
+                pro.name = *$1;
                 }
     
                 LPRNT args_decl RPRNT
 ;
-proc_call    : pidentifier LPRNT args RPRNT{
-                //funkcja przypiisujaca wartosci wskaznikow
+proc_call    : pidentifier LPRNT{arguments_decl=true;} args RPRNT{
+
                 procedure_store_pointer(*$1, arguments , symbolTable,procedure_main);
+                
                 arguments.erase(arguments.begin() , arguments.end());  
                 $$=$1;
                 }
 ;
 declarations : declarations  COMMA pidentifier {
+                 if (symbolTable.symbolExist(*$3)) {
+                    std::cerr << "Symbol already declared in current scope: " << *$3<< " in line "<<line<< std::endl;
+                    exit(1);
+                }
                 Symbol newSymbol;
                 newSymbol.name = *$3;
                 newSymbol.type = "variable";
@@ -218,15 +242,26 @@ declarations : declarations  COMMA pidentifier {
                 symbolTable.addSymbol(*$3, newSymbol);}
 
              | declarations  COMMA pidentifier LBRCKT minnum COLON minnum RBRCKT {
+                 if (symbolTable.symbolExist(*$3)) {
+                    std::cerr << "Symbol already declared in current scope: " << *$3<< " in line  "<<line<< std::endl;
+                    exit(1);
+                }
                 Symbol newSymbol;
                 newSymbol.name = *$3;
                 newSymbol.type = "array";
+                newSymbol.initialized=true;
                 newSymbol.range={$5, $7};
                 newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addArray(*$3, newSymbol);}
 
              | pidentifier  {
+                 line=yylineno;
+                 if (symbolTable.symbolExist(*$1)) {
+                    std::cerr << "Symbol already declared in current scope: " << *$1<< " in line "<<line<< std::endl;
+                    exit(1);
+                }
+                
                 Symbol newSymbol;
                 newSymbol.name = *$1;
                 newSymbol.type = "variable";
@@ -235,9 +270,16 @@ declarations : declarations  COMMA pidentifier {
                 symbolTable.addSymbol(*$1, newSymbol);}
 
              | pidentifier LBRCKT minnum COLON minnum RBRCKT {
+                  line=yylineno;
+                 if (symbolTable.symbolExist(*$1)) {
+                    std::cerr << "Symbol already declared in current scope: " << *$1<< " in line "<<line<< std::endl;
+                    exit(1);
+                }
+               
                 Symbol newSymbol;
                 newSymbol.name = *$1;
                 newSymbol.type = "array";
+                newSymbol.initialized=true;
                 newSymbol.range={$3, $5};
                 newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol.scopeLevel = symbolTable.currentScope;
@@ -245,24 +287,35 @@ declarations : declarations  COMMA pidentifier {
 ;
 args_decl    : args_decl  COMMA pidentifier
                 {
+                
                 Symbol newSymbol;
                 newSymbol.name = *$3;
                 newSymbol.type = "pointer";
+                newSymbol.initialized=true;
                 newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addSymbol(*$3, newSymbol);
+                symbolTable.procParam(pro.name,"pointer");
+
+
                 }
              | args_decl COMMA TABLE pidentifier
              {
                 Symbol newSymbol;
                 newSymbol.name = *$4;
+                newSymbol.initialized=true;
                 newSymbol.type = "pointer_array";
                 newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addSymbol(*$4, newSymbol);
+                symbolTable.procParam(pro.name,"pointer_array");
+                symbolTable.procParam(pro.name,"pointer_array");
+
+
                
                 Symbol newSymbol1;
                 newSymbol1.name = *$4+"offset";
+                newSymbol1.initialized=true;
                 newSymbol1.type = "pointer_array_offset";
                 newSymbol1.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol1.scopeLevel = symbolTable.currentScope;
@@ -274,21 +327,33 @@ args_decl    : args_decl  COMMA pidentifier
                 Symbol newSymbol;
                 newSymbol.name = *$1;
                 newSymbol.type = "pointer";
+                newSymbol.initialized=true;
                 newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addSymbol(*$1, newSymbol);
+                symbolTable.procParam(pro.name,"pointer");
+
                 }
+              
              | TABLE pidentifier
              {
                 Symbol newSymbol;
                 newSymbol.name = *$2;
                 newSymbol.type = "pointer_array";
+                newSymbol.initialized=true;
                 newSymbol.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol.scopeLevel = symbolTable.currentScope;
                 symbolTable.addSymbol(*$2, newSymbol);
-               
+
+                
+                symbolTable.procParam(pro.name,"pointer_array");
+                symbolTable.procParam(pro.name,"pointer_array");
+
+
+
                 Symbol newSymbol1;
                 newSymbol1.name = *$2+"offset";
+                newSymbol1.initialized=true;
                 newSymbol1.type = "pointer_array_offset";
                 newSymbol1.memoryAddress = symbolTable.nextMemoryAddress;
                 newSymbol1.scopeLevel = symbolTable.currentScope;
@@ -297,6 +362,7 @@ args_decl    : args_decl  COMMA pidentifier
 
 ;
 args         : args  COMMA pidentifier{
+                symbolTable.symbolInitialized(*$3);
                 Symbol symbol=symbolTable.findSymbol(*$3);
                 if(symbol.type=="variable"||symbol.type=="pointer"){
                 arguments.push_back(*$3);
@@ -309,6 +375,8 @@ args         : args  COMMA pidentifier{
                 }
             }
              | pidentifier {
+                symbolTable.symbolInitialized(*$1);
+
                 Symbol symbol=symbolTable.findSymbol(*$1);
                 if(symbol.type=="variable"||symbol.type=="pointer"){
                 arguments.push_back(*$1);
@@ -322,12 +390,84 @@ args         : args  COMMA pidentifier{
                 }
 
 ;
-expression   : value             {value_e(*($1), array_index,symbolTable);}  
-             | value ADD value   {add(*($1), *($3), array_index,symbolTable);}
-             | value SUB value   {sub(*($1), *($3), array_index, symbolTable);}
-             | value MUL value   {mul(*($1), *($3), array_index, symbolTable);}
-             | value DIV value   {div(*($1), *($3), array_index, symbolTable);}
-             | value MOD value  {mod(*($1), *($3), array_index, symbolTable);}
+expression   : value             {
+                    if(isNumber(*$1)==false){
+                    if(symbolTable.findSymbol(*$1).initialized==false){
+                        std::cerr << "Error : variable not initialized " << *$1 << " in line "<<yylineno<< std::endl;
+                        exit(1);
+                    }
+                    }
+                    value_e(*($1), array_index,symbolTable);}  
+             | value ADD value   {
+                 if(isNumber(*$1)==false){
+                    if(symbolTable.findSymbol(*$1).initialized==false){
+                        std::cerr << "Error : variable not initialized " << *$1 << " in line "<<yylineno<< std::endl;
+                        exit(1);
+                    }
+                    }
+                if(isNumber(*$3)==false){
+                    if(symbolTable.findSymbol(*$3).initialized==false){
+                        std::cerr << "Error : variable not initialized " << *$3 << " in line "<<yylineno<< std::endl;
+                        exit(1);
+                    }
+                    }
+                add(*($1), *($3), array_index,symbolTable);}
+             | value SUB value   {
+                if(isNumber(*$1)==false){
+                    if(symbolTable.findSymbol(*$1).initialized==false){
+                        std::cerr << "Error : variable not initialized " << *$1 << " in line "<<yylineno<< std::endl;
+                        exit(1);
+                    }
+                    }
+                if(isNumber(*$3)==false){
+                    if(symbolTable.findSymbol(*$3).initialized==false){
+                        std::cerr << "Error : variable not initialized " << *$3 << " in line "<<yylineno<< std::endl;
+                        exit(1);
+                    }
+                    }
+                sub(*($1), *($3), array_index, symbolTable);}
+             | value MUL value   {
+                if(isNumber(*$1)==false){
+                    if(symbolTable.findSymbol(*$1).initialized==false){
+                        std::cerr << "Error : variable not initialized " << *$1 << " in line "<<yylineno<< std::endl;
+                        exit(1);
+                    }
+                    }
+                if(isNumber(*$3)==false){
+                    if(symbolTable.findSymbol(*$3).initialized==false){
+                        std::cerr << "Error : variable not initialized " << *$3 << " in line "<<yylineno<< std::endl;
+                        exit(1);
+                    }
+                    }
+                mul(*($1), *($3), array_index, symbolTable);}
+             | value DIV value   {
+                 if(isNumber(*$1)==false){
+                    if(symbolTable.findSymbol(*$1).initialized==false){
+                        std::cerr << "Error : variable not initialized " << *$1 << " in line "<<yylineno<< std::endl;
+                        exit(1);
+                    }
+                    }
+                if(isNumber(*$3)==false){
+                    if(symbolTable.findSymbol(*$3).initialized==false){
+                        std::cerr << "Error : variable not initialized " << *$3 << " in line "<<yylineno<< std::endl;
+                        exit(1);
+                    }
+                    }
+                div(*($1), *($3), array_index, symbolTable);}
+             | value MOD value  {
+                 if(isNumber(*$1)==false){
+                    if(symbolTable.findSymbol(*$1).initialized==false){
+                        std::cerr << "Error : variable not initialized " << *$1 << " in line "<<yylineno<< std::endl;
+                        exit(1);
+                    }
+                    }
+                if(isNumber(*$3)==false){
+                    if(symbolTable.findSymbol(*$3).initialized==false){
+                        std::cerr << "Error : variable not initialized " << *$3 << " in line "<<yylineno<< std::endl;
+                        exit(1);
+                    }
+                    }
+                mod(*($1), *($3), array_index, symbolTable);}
 ;
 condition    : value EQ value     {$$ = new std::vector<std::string>{*($1), *($3), "EQ"} ;}
              | value NEQ value    {$$ = new std::vector<std::string>{*($1), *($3), "NEQ"} ;}
@@ -342,9 +482,31 @@ value        : minnum          { $$ = new std::string(std::to_string($1)); array
 minnum       : num           { $$ = $1;}
              | SUB num       { $$ = (-1)*$2; } 
 ;
-identifier:    pidentifier { $$ = $1; array_index.push_back("0");}
-             | pidentifier LBRCKT pidentifier RBRCKT { array_index.push_back(*$3); $$ = $1;  } 
-             | pidentifier LBRCKT minnum RBRCKT { array_index.push_back(std::to_string($3)); $$ = $1;  }
+identifier:    pidentifier { 
+                if(arguments_decl==false &&(symbolTable.findSymbol(*$1).type=="array"||symbolTable.findSymbol(*$1).type=="pointer_array")){
+                    std::cerr << "WRONG use of array: " << *$1 << " in line "<<yylineno<< std::endl;
+                    exit(1);
+                }
+                $$ = $1; array_index.push_back("0");}
+             | pidentifier LBRCKT pidentifier RBRCKT { 
+                if( symbolTable.findSymbol(*$1).type=="variable"||symbolTable.findSymbol(*$1).type=="pointer"){
+                    std::cerr << "WRONG use of variable: " << *$1 << " in line "<<yylineno<< std::endl;
+                    exit(1);
+                }
+                if(isNumber(*$3)==false){
+                    if(symbolTable.findSymbol(*$3).initialized==false){
+                        std::cerr << "Error : variable not initialized " << *$3 << " in line "<<yylineno<< std::endl;
+                        exit(1);
+                    }
+                    }
+                array_index.push_back(*$3); $$ = $1;  } 
+             | pidentifier LBRCKT minnum RBRCKT { 
+                if( symbolTable.findSymbol(*$1).type=="variable"||symbolTable.findSymbol(*$1).type=="pointer"){
+                    std::cerr << "WRONG use of variable: " << *$1 << " in line "<<yylineno<< std::endl;
+                    exit(1);
+                }
+                
+                array_index.push_back(std::to_string($3)); $$ = $1;  }
 
 ;
 
@@ -357,10 +519,11 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }
-
+              
       std::string outputFile = (argc > 2) ? argv[2] : "output.mr";
 
     if (yyparse() == 0) {
+                       
         std::cout << "Parsing successful!" << std::endl;
         STORE7();
         printCommands( outputFile);       
