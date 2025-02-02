@@ -2277,13 +2277,16 @@ void mod_pos() {
     commands.push_back("STORE 8\n");
     commands.push_back("LOAD 4\n");
 }
-void STORE7(std::vector<std::string>& result) {
+void STORE7() {
    
-    
-    for (int i =0;i<=result.size()-1;i++) {
-        if(result[i]=="STORE 7\n"){
-            result[i-1]="SET "+std::to_string(i+2)+"\n";
-            std::cout << i+1 << std::endl;
+    for (int i =0;i<=commands.size();i++) {
+        if(isNumber(commands[i])){
+            commands[i-1]="SET "+std::to_string(i+2)+"\n";
+            commands[i]="STORE "+commands[i]+"\n";
+            int n=i-std::stoi(commands[i+1])+3;
+
+            commands[i+1]="JUMP "+to_string(-n)+"\n";
+            
         }
     }
 }
@@ -2338,11 +2341,12 @@ void procedure_call(const std::string& symbol,std::vector<int>& procedure_size,c
     int n=commands.size();
     Symbol symbol1=symbolTable.findProcedure(symbol);
     
-    commands.push_back("SET  "+to_string(n+3)+"\n");
-    commands.push_back("STORE "+to_string(9+symbol1.scopeLevel)+"\n");
-    n=n-procedure_size[symbol1.scopeLevel]+2;
-    commands.push_back("JUMP "+to_string(-n)+"\n");
+    commands.push_back("set  "+to_string(n+3)+"\n");
+    commands.push_back(to_string(9+symbol1.scopeLevel));
+    n=procedure_size[symbol1.scopeLevel]+2;
+    commands.push_back(to_string(n));
 }
+
 void procedure_store_pointer(const std::string& symbol,std::vector<string>& arguments ,SymbolTable& symbolTable,bool procedure){
 
 

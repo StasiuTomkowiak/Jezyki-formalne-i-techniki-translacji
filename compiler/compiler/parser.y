@@ -362,7 +362,7 @@ int main(int argc, char* argv[]) {
 
     if (yyparse() == 0) {
         std::cout << "Parsing successful!" << std::endl;
-        
+        STORE7();
         printCommands( outputFile);       
     } else {
         std::cerr << "Parsing failed!" << std::endl;

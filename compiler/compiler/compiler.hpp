@@ -73,5 +73,5 @@ std::vector<std::string>* merge(const std::vector<std::string>& vec1, const std:
 bool isNumber(const std::string& s);
 void printCommands( const std::string& outputFile);
 
-void STORE7(std::vector<std::string>& result);
+void STORE7();
 
