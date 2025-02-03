@@ -1,6 +1,5 @@
 #include "compiler.hpp"
 
-
 void read(const std::string& identifier, std::vector<std::string>& array_index,SymbolTable& symbolTable) {
     
     try {
@@ -107,6 +106,7 @@ void assign(const std::string& identifier,std::vector<std::string>& array_index,
     } 
     array_index.pop_back(); 
 }
+
 void while_do(const std::vector<std::string>& condition,int n,std::vector<std::string>& array_index,const SymbolTable& symbolTable){
     int pom=commands.size()-n;
     std::vector<std::string> helper;
@@ -151,6 +151,7 @@ void while_do(const std::vector<std::string>& condition,int n,std::vector<std::s
     commands.push_back("JUMP "+std::to_string(-pom)+"\n");
 
 }
+
 void if_then(const std::vector<std::string>& condition,int n,std::vector<std::string>& array_index,const SymbolTable& symbolTable){
    
     std::vector<std::string> helper;
@@ -227,6 +228,7 @@ void repeat_until(const std::vector<std::string>& condition,int n,std::vector<st
     }
 
 }
+
 void if_then_else(const std::vector<std::string>& condition,int first,int second,std::vector<std::string>& array_index,const SymbolTable& symbolTable){
     
     std::vector<std::string> helper2;
@@ -1031,6 +1033,7 @@ void mul(const std::string& value1, const std::string& value2, std::vector<std::
     array_index.pop_back();
 
 }
+
 void div(const std::string& value1, const std::string& value2, std::vector<std::string>& array_index,const SymbolTable& symbolTable) {
 
     int n=array_index.size();
@@ -1430,6 +1433,7 @@ void div(const std::string& value1, const std::string& value2, std::vector<std::
     array_index.pop_back();
  
 }
+
 void mod(const std::string& value1, const std::string& value2, std::vector<std::string>& array_index,const SymbolTable& symbolTable) {
 
     int n=array_index.size();
@@ -1835,6 +1839,7 @@ void mod(const std::string& value1, const std::string& value2, std::vector<std::
     array_index.pop_back();
     array_index.pop_back();
 }
+
 void  value_e(const std::string& value1,std::vector<std::string>& array_index,const SymbolTable& symbolTable){
    
     int n = array_index.size();
@@ -1862,11 +1867,13 @@ void  value_e(const std::string& value1,std::vector<std::string>& array_index,co
     array_index.pop_back();
    
 }
+
 void end()
 {
     commands.push_back("HALT");
  
 }
+
 void rtn()
 {
     
@@ -1879,6 +1886,7 @@ std::vector<std::string>* merge(const std::vector<std::string>& vec1, const std:
     result->insert(result->end(), vec2.begin(), vec2.end()); // Dołączenie vec2
     return result;
 }
+
 bool isNumber(const std::string& s) {
     if (s.empty()) return false;
     if (s[0] == '-') { // Sprawdź liczbę ujemną
@@ -1894,14 +1902,17 @@ bool isNumber(const std::string& s) {
         return true;
     }
 }
+
 void load_variable(const std::string& value1,const SymbolTable& symbolTable){
     Symbol symbol1 = symbolTable.findSymbol(value1);
     commands.push_back("LOAD " + to_string(symbol1.memoryAddress)+ "\n");
 }
+
 void add_variable(const std::string& value1,const SymbolTable& symbolTable){
     Symbol symbol1 = symbolTable.findSymbol(value1);
     commands.push_back("ADD " + to_string(symbol1.memoryAddress)+ "\n");
 }
+
 void sub_variable(const std::string& value1,const SymbolTable& symbolTable){
     Symbol symbol1 = symbolTable.findSymbol(value1);
     commands.push_back("SUB " + to_string(symbol1.memoryAddress)+ "\n");
@@ -2041,7 +2052,6 @@ void add_array(const std::vector<std::string>& array, int index ,int sym_num,pai
     }
 }
   
-
 void load_array(const std::vector<std::string>& array, int index ,int sym_num,pair<int,int> range,int memory_adress,const SymbolTable& symbolTable) {
     
 
@@ -2092,6 +2102,7 @@ void sub_array(const std::vector<std::string>& array, int index ,int sym_num,pai
     }
    
 }
+
 void mul_pos() {
    
 
@@ -2126,6 +2137,7 @@ void mul_pos() {
     commands.push_back("STORE 3\n");
     commands.push_back("LOAD 5\n");
 }
+
 
 void div_pos() {
     
@@ -2196,6 +2208,7 @@ void div_pos() {
 
     commands.push_back("LOAD 3\n");
 }
+
 void mod_pos() {
     
     commands.push_back("LOAD 1\n");
@@ -2278,6 +2291,7 @@ void mod_pos() {
     commands.push_back("STORE 8\n");
     commands.push_back("LOAD 4\n");
 }
+
 void STORE7() {
    
     for (int i =0;i<commands.size()-1;i++) {
@@ -2313,14 +2327,17 @@ void load_pointer(const std::string& value1,const SymbolTable& symbolTable){
     Symbol symbol1 = symbolTable.findSymbol(value1);
     commands.push_back("LOADI " + to_string(symbol1.memoryAddress)+ "\n");
 }
+
 void add_point(const std::string& value1,const SymbolTable& symbolTable){
     Symbol symbol1 = symbolTable.findSymbol(value1);
     commands.push_back("ADDI " + to_string(symbol1.memoryAddress)+ "\n");
 }
+
 void sub_point(const std::string& value1,const SymbolTable& symbolTable){
     Symbol symbol1 = symbolTable.findSymbol(value1);
     commands.push_back("SUBI " + to_string(symbol1.memoryAddress)+ "\n");
 }
+
 void store_pointer(const std::string& value1,const SymbolTable& symbolTable){
     Symbol symbol1 = symbolTable.findSymbol(value1);
     commands.push_back("STOREI " + to_string(symbol1.memoryAddress)+ "\n");
@@ -2337,6 +2354,7 @@ void jump(){
     }else 
     commands.pop_back();
 }
+
 void procedure_call(const std::string& symbol,std::vector<int>& procedure_size,const SymbolTable& symbolTable){
     int n=commands.size();
     Symbol symbol1=symbolTable.findProcedure(symbol);
@@ -2540,6 +2558,7 @@ void load_array_pointer(const std::vector<std::string>& array, int index ,int sy
         }
 }
 }
+
 void store_array_pointer(const std::vector<std::string>& array, int index ,int sym_num,const std::string& value1,const SymbolTable& symbolTable) {
     
     if(isNumber(array[index])){
