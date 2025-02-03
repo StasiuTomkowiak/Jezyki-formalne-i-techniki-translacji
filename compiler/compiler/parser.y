@@ -487,7 +487,8 @@ identifier:    pidentifier {
                     std::cerr << "WRONG use of array: " << *$1 << " in line "<<yylineno<< std::endl;
                     exit(1);
                 }
-                $$ = $1; array_index.push_back("0");}
+                array_index.push_back("0");
+                $$ = $1; }
              | pidentifier LBRCKT pidentifier RBRCKT { 
                 if( symbolTable.findSymbol(*$1).type=="variable"||symbolTable.findSymbol(*$1).type=="pointer"){
                     std::cerr << "WRONG use of variable: " << *$1 << " in line "<<yylineno<< std::endl;

@@ -9,22 +9,22 @@ void read(const std::string& identifier, std::vector<std::string>& array_index,S
         if(symbol.petlowa==false){
         int n=array_index.size();
 
-         if (symbol.type == "variable") {
-                commands.push_back("GET " + std::to_string(symbol.memoryAddress) + "\n");
+            if (symbol.type == "variable") {
+                    commands.push_back("GET " + std::to_string(symbol.memoryAddress) + "\n");
 
-            }
-        else if (symbol.type == "array") {
-                read_array( array_index, n-1 ,1,symbol.range,symbol.memoryAddress,symbolTable); 
-            }
-        else if (symbol.type == "pointer") {
-                commands.push_back("GET 0\n" );
-                store_pointer(identifier,symbolTable);
-            }
-        else if (symbol.type == "pointer_array") {
-                commands.push_back("GET 0\n" );
-                store_array_pointer( array_index, n-1 ,1,identifier,symbolTable);
-            }}else{
-                throw std::runtime_error("ASSINING loop variable.");
+                }
+            else if (symbol.type == "array") {
+                    read_array( array_index, n-1 ,1,symbol.range,symbol.memoryAddress,symbolTable); 
+                }
+            else if (symbol.type == "pointer") {
+                    commands.push_back("GET 0\n" );
+                    store_pointer(identifier,symbolTable);
+                }
+            else if (symbol.type == "pointer_array") {
+                    commands.push_back("GET 0\n" );
+                    store_array_pointer( array_index, n-1 ,1,identifier,symbolTable);
+                }}else{
+                    throw std::runtime_error("ASSINING loop variable.");
             }
     } catch (const std::runtime_error& e) {
        
@@ -198,10 +198,6 @@ void repeat_until(const std::vector<std::string>& condition,int n,std::vector<st
       
         commands.push_back("JZERO 2\n");
         int pom=commands.size()-n;
-        std::cout<<n<<endl;
-        std::cout<<commands.size()<<endl;
-        
-        std::cout<<pom<<endl;
         commands.push_back("JUMP "+std::to_string(-pom)+ "\n");
     } else if(condition[2]=="NEQ"){
         sub(condition[0],condition[1],array_index,symbolTable);
@@ -2267,7 +2263,7 @@ void mod_pos() {
     commands.push_back("LOAD 7\n");
     commands.push_back("JZERO 4\n");
     commands.push_back("LOAD 4\n"); //dzielnik ujemny dzielna dodatnia 
-    commands.push_back("SUB 8\n");
+    commands.push_back("ADD 8\n");
     commands.push_back("STORE 4\n");
 
     commands.push_back("SET 0\n");
@@ -2282,14 +2278,13 @@ void mod_pos() {
 }
 void STORE7() {
    
-    for (int i =0;i<=commands.size();i++) {
+    for (int i =0;i<commands.size()-1;i++) {
         if(isNumber(commands[i])){
             commands[i-1]="SET "+std::to_string(i+2)+"\n";
             commands[i]="STORE "+commands[i]+"\n";
             int n=i-std::stoi(commands[i+1])+3;
 
             commands[i+1]="JUMP "+to_string(-n)+"\n";
-            
         }
     }
 }
