@@ -1492,13 +1492,14 @@ void mod(const std::string& value1, const std::string& value2, std::vector<std::
                 commands.push_back("LOAD " + std::to_string(symbol2.memoryAddress) + "\n");
                 
                 commands.push_back("JZERO "+ std::to_string(66) + "\n");
+                commands.push_back("STORE 8\n");
                 commands.push_back("JPOS 5\n");
                 commands.push_back("SET 1\n");
                 commands.push_back("STORE 7\n");
                 commands.push_back("SET 0\n");
                 commands.push_back("SUB " + std::to_string(symbol2.memoryAddress) + "\n");
                 commands.push_back("STORE 2\n");
-                commands.push_back("STORE 8\n");
+                
                 mod_pos();    
             }else if(symbol2.type=="array"){       
              
@@ -1520,6 +1521,7 @@ void mod(const std::string& value1, const std::string& value2, std::vector<std::
                 
 
                 commands.push_back("JZERO "+ std::to_string(69) + "\n");
+                commands.push_back("STORE 8\n");
                 commands.push_back("JPOS 9\n");
                 commands.push_back("STORE 5\n");
                 commands.push_back("SET 0\n");
@@ -1528,9 +1530,9 @@ void mod(const std::string& value1, const std::string& value2, std::vector<std::
                 commands.push_back("STORE 8\n");
                 commands.push_back("SET 1\n");
                 commands.push_back("STORE 7\n");
-                commands.push_back("JUMP 3\n");                
+                commands.push_back("JUMP 2\n");                
                 commands.push_back("STORE 2\n");
-                commands.push_back("STORE 8\n");
+
 
                 mod_pos();
                                
@@ -1549,13 +1551,13 @@ void mod(const std::string& value1, const std::string& value2, std::vector<std::
                 
                 load_pointer(value2,symbolTable);
                 commands.push_back("JZERO "+ std::to_string(68) + "\n");
+                commands.push_back("STORE 8\n");
                 commands.push_back("JPOS 5\n");
                 commands.push_back("SET 1\n");
                 commands.push_back("STORE 7\n");
                 commands.push_back("SET 0\n");
                 sub_point(value2,symbolTable);
                 commands.push_back("STORE 2\n");
-                commands.push_back("STORE 8\n");
 
                 commands.push_back("SET 0\n");
                 commands.push_back("STORE 3\n");
@@ -1578,6 +1580,7 @@ void mod(const std::string& value1, const std::string& value2, std::vector<std::
                 
 
                 commands.push_back("JZERO "+ std::to_string(71) + "\n");
+                commands.push_back("STORE 8\n");
                 commands.push_back("JPOS 9\n");
                 commands.push_back("STORE 5\n");
                 commands.push_back("SET 0\n");
@@ -1586,9 +1589,8 @@ void mod(const std::string& value1, const std::string& value2, std::vector<std::
                 commands.push_back("STORE 8\n");
                 commands.push_back("SET 1\n");
                 commands.push_back("STORE 7\n");
-                commands.push_back("JUMP 3\n");                
+                commands.push_back("JUMP 2\n");                
                 commands.push_back("STORE 2\n");
-                commands.push_back("STORE 8\n");
                 
                 commands.push_back("SET 0\n");
                 commands.push_back("STORE 3\n");
@@ -1784,7 +1786,7 @@ void mod(const std::string& value1, const std::string& value2, std::vector<std::
                 commands.push_back("STORE 8\n");
                 commands.push_back("SET 1\n");
                 commands.push_back("STORE 7\n");
-                commands.push_back("JUMP 3\n");                
+                commands.push_back("JUMP 2\n");                
                 commands.push_back("STORE 2\n");
             }else if(symbol2.type=="variable"){
                 commands.push_back("LOAD " + std::to_string(symbol2.memoryAddress) + "\n");
@@ -1819,7 +1821,7 @@ void mod(const std::string& value1, const std::string& value2, std::vector<std::
                 commands.push_back("STORE 8\n");
                 commands.push_back("SET 1\n");
                 commands.push_back("STORE 7\n");
-                commands.push_back("JUMP 3\n");                
+                commands.push_back("JUMP 2\n");                
                 commands.push_back("STORE 2\n");
             }
             commands.push_back("SET 0\n");

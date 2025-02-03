@@ -1,0 +1,8 @@
+# kod zoptymalizowany
+
+SET 10
+SET 20 
+ADD 0
+STORE 1
+PUT 1
+HALT
