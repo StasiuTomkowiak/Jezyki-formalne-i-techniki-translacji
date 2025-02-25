@@ -15,7 +15,7 @@ struct Symbol {
     std::string type;                         
     int memoryAddress;                        
     int scopeLevel;                           
-    std::pair<int, int> range;    
+    std::pair<long long, long long> range;    
     std::vector<std::string> parameters;               
     bool initialized=false;
     bool petlowa=false;
