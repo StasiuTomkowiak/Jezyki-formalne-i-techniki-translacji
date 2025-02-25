@@ -13,6 +13,7 @@ void SymbolTable::addSymbol(const std::string& name, const Symbol& symbol) {
     table[name] = newSymbol;
     nextMemoryAddress++;
 }
+
 void SymbolTable::addLoop(const std::string& name, const Symbol& symbol) {
     if (table.find(name) != table.end() && table[name].scopeLevel == currentScope) {
         std::cerr << "Symbol already declared in current scope: " << name << " in line "<<yylineno<< std::endl;
@@ -24,6 +25,7 @@ void SymbolTable::addLoop(const std::string& name, const Symbol& symbol) {
     table[name] = newSymbol;
     nextforindex++;
 }
+
 void SymbolTable::addArray(const std::string& name, const Symbol& symbol) {
    if (table.find(name) != table.end() && table[name].scopeLevel == currentScope) {
         std::cerr << "Symbol already declared in current scope: " << name << " in line "<<yylineno<< std::endl;
@@ -39,15 +41,16 @@ void SymbolTable::addArray(const std::string& name, const Symbol& symbol) {
 
     nextMemoryAddress += rangeLength;
 }
+
 void SymbolTable::symbolInitialized(const std::string& name){
         auto it = table.find(name);
         it->second.initialized=true;
 }
+
 void SymbolTable::procParam(const std::string& name,std::string value){
         auto it = table.find(name);
         it->second.parameters.push_back(value);
 }
-
 
 int SymbolTable::calculateRangeLength(const Symbol& symbol) {
     if (symbol.type != "array") {
@@ -64,7 +67,6 @@ Symbol SymbolTable::findSymbol(const std::string& name) const {
     }
     return it->second;
 }
-
 
 Symbol SymbolTable::findProcedure(const std::string& name) const {
     auto it = table.find(name);
@@ -84,6 +86,7 @@ bool SymbolTable::symbolExist(const std::string& name) const {
     }
     return true;
 }
+
 bool SymbolTable::ProcedureExist(const std::string& name)  {
     auto it = table.find(name);
     if (it == table.end()) {
@@ -91,6 +94,7 @@ bool SymbolTable::ProcedureExist(const std::string& name)  {
     }
     return true;
 }
+
 bool SymbolTable::ProcedureRec(const std::string& name)  {
     auto it = table.find(name);
     if (it == table.end()||it->second.scopeLevel == currentScope) {
@@ -98,6 +102,7 @@ bool SymbolTable::ProcedureRec(const std::string& name)  {
     }
     return true;
 }
+
 int SymbolTable::getArrayElementAddress(const std::string& arrayName, int index) const {
     Symbol symbol = findSymbol(arrayName);
 
@@ -132,6 +137,7 @@ void SymbolTable::enterScope() {
 void SymbolTable::exitScope() {
     --currentScope;
 }
+
 void SymbolTable::ChangeScope(int n) {
     currentScope=n;
 }
