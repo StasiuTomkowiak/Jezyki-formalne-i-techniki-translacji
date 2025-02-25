@@ -150,7 +150,6 @@ void SymbolTable::debugPrint() const {
                   << "\n";
     }
 }
-
 void SymbolTable::removeSymbol(const std::string& name) {
     auto it = table.find(name);
     if (it != table.end()) {
