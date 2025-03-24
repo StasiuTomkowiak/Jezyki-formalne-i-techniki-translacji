@@ -31,6 +31,3 @@ To run the compiled program, use the following command:
 ./maszyna-wirtualna your_executable.mr
 ```
 
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
