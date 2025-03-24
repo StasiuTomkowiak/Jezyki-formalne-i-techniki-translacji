@@ -6,9 +6,6 @@ Solutions to laboratory tasks from FLTT 2024/2025
 
 - `compiler/` - Contains files related to the compiler, including sources, headers, lexical files, and parser.
     - `src/` - Source files for the compiler.
-    - `include/` - Header files for the compiler.
-    - `lex/` - Lexical analysis files.
-    - `parser/` - Parser files.
     - `virtual_machine/` - Contains files related to the virtual machine, including instructions, lexical files, and the main source file.
     - `examples/` - Example files for testing.
     - `tests/` - Test files.
